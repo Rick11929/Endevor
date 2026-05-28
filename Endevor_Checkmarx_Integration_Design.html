@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Endevor to Checkmarx SAST Integration Design</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; color: #333; }
+        h1, h2, h3 { color: #1e3a8a; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background-color: #f0f7ff; }
+        pre { background-color: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .section { margin-bottom: 40px; }
+        ul { padding-left: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>Endevor Mainframe Code Integration Design for Checkmarx SAST Scanning</h1>
+    <p><strong>Version:</strong> 1.0 | <strong>Date:</strong> May 28, 2026 | <strong>Author:</strong> Grok (Cyber SAST SME Support)</p>
+
+    <div class="section">
+        <h2>1. Objective</h2>
+        <p>Design a reliable, automated, and scalable solution to periodically extract source code (Elements) from multiple Endevor-managed Mainframe applications and perform SAST scanning using Checkmarx.</p>
+    </div>
+
+    <div class="section">
+        <h2>2. Scope</h2>
+        <ul>
+            <li>Support <strong>10+ Mainframe Applications</strong> stored in Endevor.</li>
+            <li>Use <strong>Python + Endevor REST API v2</strong> as the primary integration method.</li>
+            <li>Periodic scanning (daily / weekly).</li>
+            <li>Cover mainframe languages: COBOL, COPYBOOK, PL/I, JCL, etc.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>3. Information Collection Phase</h2>
+        
+        <h3>3.1 Required Information per Application</h3>
+        <table>
+            <tr><th>Field</th><th>Description</th><th>Example</th><th>Mandatory</th></tr>
+            <tr><td>Application Name</td><td>Business name of the application</td><td>Payroll System</td><td>Yes</td></tr>
+            <tr><td>Environment</td><td>Endevor Environment</td><td>PROD</td><td>Yes</td></tr>
+            <tr><td>Stage Number</td><td>Stage to scan</td><td>1</td><td>Yes</td></tr>
+            <tr><td>System</td><td>Endevor System</td><td>FIN</td><td>Yes</td></tr>
+            <tr><td>Subsystem</td><td>Endevor Subsystem</td><td>PAYROLL</td><td>Yes</td></tr>
+            <tr><td>Types to Scan</td><td>Element Types</td><td>COBOL, COPYBOOK, JCL</td><td>Yes</td></tr>
+            <tr><td>Element Filter</td><td>Naming pattern</td><td>PAY*</td><td>Yes</td></tr>
+            <tr><td>Configuration Name</td><td>Endevor Configuration</td><td>ENDVPROD</td><td>Yes</td></tr>
+            <tr><td>Expected Element Count</td><td>Approximate number</td><td>~850</td><td>Yes</td></tr>
+            <tr><td>Business Owner</td><td>Responsible person</td><td>John Doe</td><td>Yes</td></tr>
+        </table>
+
+        <h3>3.2 Global Information</h3>
+        <ul>
+            <li>Endevor REST API Base URL</li>
+            <li>Authentication method (Basic Auth / JWT)</li>
+            <li>Service Account credentials</li>
+            <li>Checkmarx Project naming convention</li>
+            <li>Scanning frequency</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>4. Integration Architecture</h2>
+        <p><strong>High-Level Design</strong></p>
+        <pre>
+Endevor (Mainframe)
+      ↓ (REST API v2)
+Python Integration Service (Linux Server)
+      ↓ (Pull + Package)
+Checkmarx One CLI / API
+      ↓
+Checkmarx Dashboard + Reports
+      ↓
+Jira / ServiceNow / Email Notification
+        </pre>
+    </div>
+
+    <div class="section">
+        <h2>5. Implementation</h2>
+        
+        <h3>5.1 Python Core Module</h3>
+        <pre><code>class EndevorClient:
+    def __init__(self, base_url, username, password, config_name):
+        ...
+        
+async def list_elements(...)
+async def retrieve_element(...)</code></pre>
+
+        <h3>5.2 Configuration (config.yaml)</h3>
+        <pre><code>applications:
+  - name: "PAYROLL"
+    env: "PROD"
+    stage: 1
+    system: "FIN"
+    subsystem: "PAYROLL"
+    types: ["COBOL", "COPYBOOK"]
+    element_filter: "PAY*"</code></pre>
+    </div>
+
+    <div class="section">
+        <h2>6. Test Cases</h2>
+        
+        <h3>Functional Test Cases</h3>
+        <table>
+            <tr><th>Test ID</th><th>Scenario</th><th>Expected Result</th></tr>
+            <tr><td>TC-01</td><td>List Elements</td><td>Returns correct count</td></tr>
+            <tr><td>TC-02</td><td>Retrieve single Element</td><td>File saved correctly</td></tr>
+            <tr><td>TC-03</td><td>Full pipeline</td><td>Scan completed + Report generated</td></tr>
+        </table>
+
+        <h3>Pilot Testing Plan</h3>
+        <ul>
+            <li>Phase 1: 2 applications</li>
+            <li>Phase 2: 5 applications</li>
+            <li>Phase 3: All 10+ applications</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>7. Security & Best Practices</h2>
+        <ul>
+            <li>Dedicated service account with least privilege</li>
+            <li>Credentials in Secret Manager</li>
+            <li>Auto-cleanup of temporary workspace</li>
+            <li>HTTPS + Audit logging</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>8. Next Steps</h2>
+        <ol>
+            <li>Start information collection using the template</li>
+            <li>Set up Pilot with 1-2 applications</li>
+            <li>Develop Python client and pipeline</li>
+        </ol>
+    </div>
+
+    <hr>
+    <p style="text-align: center; color: #666; font-size: 0.9em;">
+        Generated for internal use • Endevor to Checkmarx SAST Integration
+    </p>
+
+</body>
+</html>
