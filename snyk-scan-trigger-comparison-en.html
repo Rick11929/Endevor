@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snyk Scan Trigger Methods — Deep-dive Comparison</title>
+<style>
+  :root {
+    --ink: #1a2332;
+    --muted: #5b6779;
+    --line: #dfe5ee;
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --accent: #4b3ee0;
+    --ok: #0e8a5f;
+    --warn: #b97a0a;
+    --no: #c03535;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 40px 24px 80px; }
+  header h1 { font-size: 28px; margin: 0 0 6px; }
+  header .sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 3px rgba(20, 30, 50, .05);
+  }
+  h2 { font-size: 19px; margin: 0 0 14px; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { border: 1px solid var(--line); padding: 10px 12px; vertical-align: top; text-align: left; }
+  thead th { background: #eef1f8; font-size: 13px; }
+  tbody th { background: #f7f9fc; width: 150px; font-weight: 600; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-right: 4px; white-space: nowrap; }
+  .yes { background: #e2f4ec; color: var(--ok); }
+  .part { background: #fdf1dc; color: var(--warn); }
+  .no { background: #fbe4e4; color: var(--no); }
+  code {
+    background: #eef0f6; padding: 1px 5px; border-radius: 4px;
+    font-family: "Cascadia Code", Consolas, monospace; font-size: 12.5px;
+  }
+  sup.src a { color: var(--accent); text-decoration: none; font-weight: 700; }
+  sup.src a:hover { text-decoration: underline; }
+  ul { margin: 6px 0; padding-left: 20px; }
+  li { margin-bottom: 6px; }
+  .takeaway b { color: var(--ink); }
+  .src-list li { font-size: 13.5px; margin-bottom: 8px; word-break: break-all; }
+  .src-list a { color: var(--accent); }
+  footer { color: var(--muted); font-size: 12.5px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Snyk Scan Trigger Methods — Deep-dive Comparison</h1>
+  <div class="sub">Focus: Snyk Code (SAST) &middot; Research date: 2026-07-31 &middot; Sources: Snyk official docs, Snyk Support knowledge base, and community discussions (numbered references at the bottom)</div>
+</header>
+
+<div class="card">
+  <h2>Comparison Table</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:150px">Dimension</th>
+        <th>Snyk CLI (<code>snyk code test</code>, incl. CI/CD)</th>
+        <th>Snyk SCM Integration (GitHub / GitLab / Bitbucket / Azure)</th>
+        <th>Snyk API (v1 Import / REST)</th>
+        <th>Snyk IDE Plugins (supplementary)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>How scans are triggered</th>
+        <td>Run <code>snyk code test &lt;path&gt;</code> against any local directory; <code>--report --project-name</code> publishes results to the Web UI as a Project, <b>with or without any SCM integration</b>.<sup class="src"><a href="#s1">[1]</a><a href="#s2">[2]</a></sup></td>
+        <td>Automatic scan after repo import + scheduled retests + on-demand "Retest now"; optional PR Checks scan any PR before merge.<sup class="src"><a href="#s3">[3]</a><a href="#s4">[4]</a></sup></td>
+        <td>v1 <code>POST /v1/org/{orgId}/integrations/{integrationId}/import</code> (Import targets) triggers SCM repo imports programmatically; REST API is mainly for <b>querying</b> Code Projects/issues.<sup class="src"><a href="#s5">[5]</a><a href="#s6">[6]</a></sup></td>
+        <td>Real-time scanning of the locally opened workspace.</td>
+      </tr>
+      <tr>
+        <th>Suitable for multiple-branch scanning?</th>
+        <td><span class="pill yes">YES — best fit</span> Check out any branch and scan; <code>--target-reference="$(git branch --show-current)"</code> groups Projects by branch in the UI (Enterprise feature). Community practice (keycloak/keycloak#20364): scheduled CI scans per branch (main + release).<sup class="src"><a href="#s1">[1]</a><a href="#s7">[7]</a><a href="#s8">[8]</a></sup></td>
+        <td><span class="pill part">LIMITED</span> Only the <b>default branch</b> is monitored by default. Non-default branch import is a <b>Closed Beta</b> feature (requires contacting Snyk Support); each branch/manifest creates separate Projects and separate commit statuses. PR Checks can cover PRs to any branch, but results are PR-scoped, not persistent per-branch monitoring.<sup class="src"><a href="#s9">[9]</a><a href="#s10">[10]</a></sup></td>
+        <td><span class="pill part">SCRIPTABLE, SAME GATE</span> Import targets accepts a <code>target.branch</code> field, so multi-branch imports can be scripted (with <code>snyk-api-import</code>), but non-default branch monitoring shares the same Closed Beta gating model as the SCM integration.<sup class="src"><a href="#s5">[5]</a><a href="#s9">[9]</a><a href="#s11">[11]</a></sup></td>
+        <td><span class="pill yes">YES</span> Scans whichever branch is checked out, but findings do not persist as platform Projects.</td>
+      </tr>
+      <tr>
+        <th>Suitable for manual code upload scanning?</th>
+        <td><span class="pill yes">YES — the only way</span> Scans any local folder (unzipped archive, copied code) with no git repo required. Source files &lt;4MB are bundled and uploaded, honoring <code>.gitignore</code> / <code>.dcignore</code>.<sup class="src"><a href="#s2">[2]</a><a href="#s12">[12]</a></sup></td>
+        <td><span class="pill no">NO</span> Requires a repository on a supported SCM (self-hosted SCM requires Snyk Broker); no zip-upload entry point in the Web UI.<sup class="src"><a href="#s3">[3]</a></sup></td>
+        <td><span class="pill no">NO</span> No public endpoint to upload a source bundle and trigger a SAST scan (the legacy DeepCode bundle API is deprecated). The Import API only points Snyk at an SCM repo address and still needs a configured <code>integrationId</code>. Snyk also notes API-inferred scans are less accurate than local CLI scans.<sup class="src"><a href="#s5">[5]</a><a href="#s6">[6]</a><a href="#s13">[13]</a></sup></td>
+        <td><span class="pill yes">YES</span> Scans any locally opened code, no remote repo needed.</td>
+      </tr>
+      <tr>
+        <th>Code snippet visible after scan?</th>
+        <td><span class="pill part">PARTIAL</span> Terminal shows file path + line number (sink) only. Full snippets require <code>snyk-to-html</code> (HTML report) or <code>--report</code> publishing to the Web UI.<sup class="src"><a href="#s14">[14]</a><a href="#s15">[15]</a></sup></td>
+        <td><span class="pill yes">YES</span> Web UI "Full details" panel shows code snippets and links out to the exact line in the Git repository.<sup class="src"><a href="#s16">[16]</a></sup></td>
+        <td><span class="pill no">NO</span> Returns issue metadata JSON only; no rendered snippets.</td>
+        <td><span class="pill yes">YES</span> Inline display of the flagged code in the editor.</td>
+      </tr>
+      <tr>
+        <th>Full data flow visible after scan?</th>
+        <td><span class="pill part">PARTIAL</span> Terminal "Info" field contains the data-flow <b>text description</b> (same text as the Web UI). <code>snyk-to-html</code> reports include <b>Data Flow + Fix Analysis buttons</b>; after <code>--report</code>, the full visualization is available in the Web UI.<sup class="src"><a href="#s14">[14]</a><a href="#s15">[15]</a></sup></td>
+        <td><span class="pill yes">YES — most complete</span> Step-by-step source→sink visualization showing the code lines of every step, plus Fix analysis with real-world fix examples from open-source projects.<sup class="src"><a href="#s16">[16]</a><a href="#s12">[12]</a></sup></td>
+        <td><span class="pill no">NO</span> Data-flow visualization is a Web UI / IDE capability; the API does not return it.</td>
+        <td><span class="pill yes">YES</span> Data flow shown in the plugin panel.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Key Takeaways</h2>
+  <ul>
+    <li class="takeaway"><b>For multi-branch scanning, choose the CLI.</b> It is the most mature path, validated by both official docs and community practice: check out a branch, scan, and group with <code>--target-reference</code>, or schedule per-branch CI runs. SCM branch monitoring is still behind a Closed Beta.<sup class="src"><a href="#s1">[1]</a><a href="#s8">[8]</a><a href="#s9">[9]</a></sup></li>
+    <li class="takeaway"><b>The CLI is the only way to scan manually uploaded code.</b> Neither the Web UI nor the API accepts direct source-package uploads — everything must hang off an SCM repository. For strict no-upload policies, consider Snyk Code Local Engine (self-hosted, code never leaves your network, still CLI-triggered).<sup class="src"><a href="#s2">[2]</a><a href="#s12">[12]</a></sup></li>
+    <li class="takeaway"><b>The full snippet + data-flow experience always ends in the Web UI.</b> SCM imports get it natively; CLI scans need <code>--report</code> or <code>snyk-to-html</code> to fill the gap; the API is for pulling data into your own systems, not for interactive auditing.<sup class="src"><a href="#s15">[15]</a><a href="#s16">[16]</a></sup></li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>Sources</h2>
+  <ul class="src-list">
+    <li id="s1">[1] Snyk Docs — Scan source code with Snyk Code using the CLI (publish results with <code>--report</code>, <code>--project-name</code>/<code>--target-name</code>/<code>--target-reference</code>, "with or without using an integration"): <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-snyk-code/scan-source-code-with-snyk-code-using-the-cli">docs.snyk.io</a></li>
+    <li id="s2">[2] Snyk Docs — Publish Snyk Code CLI results and ignore issues: <a href="https://docs.snyk.io/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-snyk-code/publish-snyk-code-cli-results-and-ignore-issues">docs.snyk.io</a></li>
+    <li id="s3">[3] Snyk Docs — Choose rollout integrations (SCM integration features: daily testing of a specified branch, optional PR checks against any branch): <a href="https://docs.snyk.io/implement-snyk/enterprise-implementation-guide/phase-1-discovery-and-planning/choose-rollout-integrations">docs.snyk.io</a></li>
+    <li id="s4">[4] Snyk Docs — Manage code vulnerabilities (import → scheduled retest → "Retest now" workflow): <a href="https://docs.snyk.io/scan-fix-and-prevent/scan-with-snyk/snyk-code/manage-code-vulnerabilities">docs.snyk.io</a></li>
+    <li id="s5">[5] Snyk API Reference — Import Projects (v1), <code>target.branch</code> in request body: <a href="https://docs.snyk.io/snyk-api/reference/import-projects-v1">docs.snyk.io</a></li>
+    <li id="s6">[6] Snyk Docs — Snyk API overview ("Query Code Projects and issues using the Snyk REST API"; API less accurate than CLI for many package managers): <a href="https://docs.snyk.io/snyk-api">docs.snyk.io</a></li>
+    <li id="s7">[7] Snyk Support — How do I test a different branch of a project via the CLI? ("checkout the other branch in git and then execute the Snyk scan as usual"): <a href="https://support.snyk.io/s/article/How-do-I-test-a-different-branch-of-a-project-via-the-CLI">support.snyk.io</a></li>
+    <li id="s8">[8] GitHub — keycloak/keycloak issue #20364: community workaround scanning main + release branches via scheduled CI: <a href="https://github.com/keycloak/keycloak/issues/20364">github.com/keycloak/keycloak#20364</a></li>
+    <li id="s9">[9] Snyk Support — Which branch does Snyk Monitor? ("Today Snyk monitors the default branch"; non-default branch import = Closed Beta): <a href="https://support.snyk.io/hc/en-us/articles/360001497578-Which-branch-does-Snyk-Monitor">support.snyk.io</a></li>
+    <li id="s10">[10] Snyk Support — How can I change the project branch? (delete and re-import): <a href="https://support.snyk.io/s/question/0D5PU00000iBUTP0A4/how-can-i-change-the-project-branch">support.snyk.io</a></li>
+    <li id="s11">[11] Snyk Docs — Tool: snyk-api-import / Kicking off an import (batch import with branch in target): <a href="https://docs.snyk.io/developer-tools/snyk-apps/tool-snyk-api-import/kicking-off-an-import">docs.snyk.io</a></li>
+    <li id="s12">[12] Snyk Docs — Snyk Code overview (file bundling &lt;4MB, .gitignore/.dcignore honored; Data flow &amp; Fix analysis features; Snyk Code Local Engine deployment): <a href="https://docs.snyk.io/scan-fix-and-prevent/scan-with-snyk/snyk-code">docs.snyk.io</a></li>
+    <li id="s13">[13] Snyk Docs — API endpoints index and tips (import job lifecycle and failure modes): <a href="https://docs.snyk.io/developer-tools/snyk-api/api-endpoints-index-and-tips">docs.snyk.io</a></li>
+    <li id="s14">[14] Snyk Docs — View Snyk Code CLI results (terminal Header/Path/Info; Info text = Web UI Data flow text; JSON/SARIF output): <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-snyk-code/view-snyk-code-cli-results">docs.snyk.io</a></li>
+    <li id="s15">[15] Snyk Docs — snyk-to-html (HTML report exposes "Data Flow" and "Fix Analysis" buttons for Snyk Code results): <a href="https://github.com/snyk/user-docs/blob/main/developer-tools/snyk-cli/scan-and-maintain-projects-using-the-cli/cli-tools/snyk-to-html.md">snyk/user-docs (GitHub)</a></li>
+    <li id="s16">[16] Snyk Docs — Breakdown of Code analysis (Data flow: step-by-step source→sink visualization with code lines; external link to repo file): <a href="https://docs.snyk.io/scan-fix-and-prevent/scan-with-snyk/snyk-code/manage-code-vulnerabilities/breakdown-of-code-analysis">docs.snyk.io</a></li>
+  </ul>
+  <footer>Note: Community answers (e.g., StackOverflow on <code>snyk code test --report</code> publishing) corroborate the CLI behaviors above. Closed Beta availability of non-default branch monitoring may change — verify with Snyk Support before finalizing a product selection.</footer>
+</div>
+
+</div>
+</body>
+</html>
