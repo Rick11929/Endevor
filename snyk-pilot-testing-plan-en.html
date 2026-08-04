@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snyk Pilot Testing Plan — CLI &amp; IDE (Pre-Broker)</title>
+<style>
+  :root{
+    --ink:#1a2233; --muted:#5b6577; --line:#dfe4ec; --bg:#f7f8fa;
+    --accent:#4b3fd6; --accent-soft:#efedfb; --green:#1e8e5a; --green-soft:#e7f5ee;
+    --amber:#b4690e; --amber-soft:#fdf3e3; --red:#c0392b; --red-soft:#fdeceb;
+    --blue:#1f6feb; --blue-soft:#e9f1fd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+  .page{max-width:1060px;margin:0 auto;padding:48px 32px 96px;background:#fff;box-shadow:0 0 24px rgba(0,0,0,.06)}
+  header.doc{border-bottom:4px solid var(--accent);padding-bottom:24px;margin-bottom:32px}
+  header.doc h1{font-size:30px;letter-spacing:-.5px}
+  header.doc .sub{font-size:16px;color:var(--muted);margin-top:6px}
+  .meta{display:flex;flex-wrap:wrap;gap:16px;margin-top:16px;font-size:13px;color:var(--muted)}
+  .meta span{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 10px}
+  h2{font-size:21px;margin:44px 0 14px;padding-left:12px;border-left:5px solid var(--accent)}
+  h3{font-size:16px;margin:26px 0 10px;color:var(--accent)}
+  p{margin:10px 0;font-size:14.5px}
+  ul,ol{margin:10px 0 10px 24px;font-size:14.5px}
+  li{margin:5px 0}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th{background:var(--accent);color:#fff;text-align:left;padding:9px 10px;font-weight:600}
+  td{border:1px solid var(--line);padding:8px 10px;vertical-align:top}
+  tr:nth-child(even) td{background:#fafbfd}
+  .badge{display:inline-block;padding:1px 9px;border-radius:11px;font-size:12px;font-weight:600;white-space:nowrap}
+  .b-p0{background:var(--red-soft);color:var(--red)}
+  .b-p1{background:var(--amber-soft);color:var(--amber)}
+  .b-p2{background:var(--blue-soft);color:var(--blue)}
+  .b-scope{background:var(--green-soft);color:var(--green)}
+  .b-out{background:#eceff3;color:var(--muted)}
+  .callout{border:1px solid var(--line);border-left:5px solid var(--accent);background:var(--accent-soft);padding:14px 18px;border-radius:6px;margin:16px 0;font-size:14px}
+  .callout.warn{border-left-color:var(--amber);background:var(--amber-soft)}
+  .callout.ok{border-left-color:var(--green);background:var(--green-soft)}
+  code{background:#eef1f6;padding:1px 6px;border-radius:4px;font-family:Consolas,Menlo,monospace;font-size:13px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .card{border:1px solid var(--line);border-radius:8px;padding:16px 18px;background:#fff}
+  .card h4{font-size:14px;margin-bottom:8px;color:var(--accent)}
+  .toc{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:18px 22px;font-size:14px;column-count:2;column-gap:40px}
+  .toc a{color:var(--accent);text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  .toc li{margin:4px 0}
+  footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+  .kpi{font-weight:700;color:var(--green)}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr}.toc{column-count:1}.page{padding:32px 16px 64px}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="doc">
+  <h1>Snyk Internal Pilot Testing Plan</h1>
+  <div class="sub">Phase 1 — CLI &amp; IDE Integration Testing (Pre-Broker Deployment)</div>
+  <div class="meta">
+    <span>Version: 1.0</span>
+    <span>Date: 2026-08-04</span>
+    <span>Pilot Size: ~40 Developers</span>
+    <span>Scope: Snyk CLI + IDE Plugins</span>
+    <span>Out of Scope: Snyk Broker, CI/CD Integration, SCM Integration</span>
+  </div>
+</header>
+
+<h2 id="toc">Table of Contents</h2>
+<ol class="toc">
+  <li><a href="#s1">1. Background &amp; Objectives</a></li>
+  <li><a href="#s2">2. Scope Definition</a></li>
+  <li><a href="#s3">3. Pilot Team &amp; Grouping</a></li>
+  <li><a href="#s4">4. Environment &amp; Prerequisites</a></li>
+  <li><a href="#s5">5. Timeline</a></li>
+  <li><a href="#s6">6. Test Cases — CLI</a></li>
+  <li><a href="#s7">7. Test Cases — IDE</a></li>
+  <li><a href="#s8">8. Cross-Cutting / Non-Functional Cases</a></li>
+  <li><a href="#s9">9. Metrics &amp; Data Collection</a></li>
+  <li><a href="#s10">10. Success Criteria</a></li>
+  <li><a href="#s11">11. Risks &amp; Mitigations</a></li>
+  <li><a href="#s12">12. Exit Criteria &amp; Next Phase</a></li>
+  <li><a href="#app">Appendix — Feedback Template</a></li>
+</ol>
+
+<h2 id="s1">1. Background &amp; Objectives</h2>
+<p>We have decided to run an internal pilot of Snyk. Because the <strong>Snyk Broker</strong> solution (required for connecting Snyk to our internal/private repositories behind the firewall) has <strong>not yet been deployed</strong>, this first pilot phase is limited to <strong>Snyk CLI</strong> and <strong>IDE plugin</strong> workflows, both of which operate from the developer workstation and do not depend on the Broker.</p>
+<h3>1.1 Objectives</h3>
+<ul>
+  <li><strong>Validate core value:</strong> confirm Snyk can accurately detect vulnerabilities (SCA + SAST) in our real internal codebases via CLI and IDE.</li>
+  <li><strong>Evaluate developer experience:</strong> measure installation friction, scan speed, result readability, fix workflow, and false-positive burden in day-to-day development.</li>
+  <li><strong>Verify internal-network compatibility:</strong> confirm CLI/IDE work within our corporate network (proxy, firewall, internal package registries such as Nexus/Artifactory, internal CA certificates).</li>
+  <li><strong>Collect adoption signals:</strong> understand whether developers would keep using Snyk after the pilot, before we invest in Broker deployment and broader rollout.</li>
+  <li><strong>Produce a go/no-go recommendation</strong> for Phase 2 (Broker deployment + SCM/CI integration) with concrete data.</li>
+</ul>
+
+<h2 id="s2">2. Scope Definition</h2>
+<table>
+  <tr><th style="width:50%">In Scope (Phase 1)</th><th>Out of Scope (Deferred to Phase 2)</th></tr>
+  <tr>
+    <td>
+      <span class="badge b-scope">IN</span> Snyk CLI — <code>snyk test</code>, <code>snyk monitor</code>, <code>snyk code test</code>, <code>snyk iac test</code>, <code>snyk container test</code> (if Docker available)<br>
+      <span class="badge b-scope">IN</span> Snyk IDE plugins — VS Code and JetBrains (IntelliJ IDEA / others)<br>
+      <span class="badge b-scope">IN</span> Open-source dependency scanning (SCA) + Snyk Code (SAST)<br>
+      <span class="badge b-scope">IN</span> Corporate proxy / internal registry / internal CA configuration<br>
+      <span class="badge b-scope">IN</span> Snyk web UI (viewing results pushed by <code>snyk monitor</code>)<br>
+      <span class="badge b-scope">IN</span> Authentication via SSO / API token from workstation
+    </td>
+    <td>
+      <span class="badge b-out">OUT</span> Snyk Broker deployment &amp; configuration<br>
+      <span class="badge b-out">OUT</span> SCM integration (GitLab/GitHub Enterprise/Bitbucket Server import)<br>
+      <span class="badge b-out">OUT</span> CI/CD pipeline integration (Jenkins/GitLab CI gates)<br>
+      <span class="badge b-out">OUT</span> Automated PR/MR fix workflows via SCM<br>
+      <span class="badge b-out">OUT</span> Jira / Slack integrations<br>
+      <span class="badge b-out">OUT</span> Policy-as-code / Org-wide governance rules<br>
+      <span class="badge b-out">OUT</span> License compliance policy enforcement (informational only)
+    </td>
+  </tr>
+</table>
+<div class="callout warn"><strong>Note:</strong> Any test case that requires the Broker (e.g., scanning private Git repos directly from the Snyk UI) is explicitly excluded. Phase 1 findings will inform Broker requirements for Phase 2.</div>
+
+<h2 id="s3">3. Pilot Team &amp; Grouping</h2>
+<p>~40 developers will be recruited across teams and technology stacks to ensure representative coverage.</p>
+<table>
+  <tr><th>Group</th><th>Size</th><th>Profile</th><th>Primary Focus</th></tr>
+  <tr><td><strong>A — CLI Core</strong></td><td>12</td><td>Backend developers (Java / Node.js / Python / Go)</td><td><code>snyk test</code>/<code>snyk monitor</code> on real services; internal registry compatibility</td></tr>
+  <tr><td><strong>B — IDE Core</strong></td><td>12</td><td>Split: 6 VS Code users, 6 JetBrains users</td><td>IDE plugin install, real-time scanning, fix suggestions, UX</td></tr>
+  <tr><td><strong>C — SAST / Snyk Code</strong></td><td>8</td><td>Full-stack &amp; frontend developers</td><td><code>snyk code test</code> accuracy, false-positive rate, language coverage</td></tr>
+  <tr><td><strong>D — Extended Scenarios</strong></td><td>8</td><td>Mixed: DevOps-leaning devs, mobile/desktop devs</td><td>Monorepo, multi-manifest, IaC (<code>snyk iac test</code>), container scan, edge cases</td></tr>
+</table>
+<h3>3.1 Roles</h3>
+<ul>
+  <li><strong>Pilot Lead (1):</strong> owns plan execution, triages issues, interfaces with Snyk vendor/support.</li>
+  <li><strong>Security Champion(s) (1–2):</strong> validates severity/false-positive assessments, defines baseline expectations.</li>
+  <li><strong>Pilot Participants (40):</strong> execute assigned test cases, file feedback weekly.</li>
+</ul>
+<h3>3.2 Selection Criteria for Participants</h3>
+<ul>
+  <li>Works on an actively maintained internal repository with real dependencies.</li>
+  <li>Mix of seniority levels (at least 25% junior/mid to surface usability friction).</li>
+  <li>Willing to commit ~1–2 hours/week for 4–6 weeks and complete weekly surveys.</li>
+</ul>
+
+<h2 id="s4">4. Environment &amp; Prerequisites</h2>
+<div class="grid2">
+  <div class="card">
+    <h4>4.1 Accounts &amp; Licensing</h4>
+    <ul>
+      <li>Snyk Organization created; pilot group(s) configured.</li>
+      <li>40 seats provisioned; SSO (or invited accounts) enabled.</li>
+      <li>API tokens distributable to CLI users.</li>
+      <li>Confirm plan limits (test counts for Snyk Code / Container) fit pilot volume.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>4.2 Network</h4>
+    <ul>
+      <li>Firewall/proxy allowlist: <code>snyk.io</code>, <code>api.snyk.io</code>, <code>app.snyk.io</code>, <code>deeproxy.snyk.io</code> (Snyk Code), update endpoints.</li>
+      <li>Corporate root CA available for CLI/IDE (<code>NODE_EXTRA_CA_CERTS</code> or equivalent).</li>
+      <li>Proxy env vars documented for participants (<code>HTTP_PROXY</code>/<code>HTTPS_PROXY</code>).</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>4.3 Test Assets</h4>
+    <ul>
+      <li>6–10 representative internal repos (varied languages/build tools: Maven/Gradle, npm/yarn/pnpm, pip/Poetry, Go modules).</li>
+      <li>At least 1 monorepo and 1 repo with multiple manifests.</li>
+      <li>1 repo with known vulnerable dependency versions (seeded, non-production) for detection validation.</li>
+      <li>Optional: Terraform/K8s YAML samples for IaC; a Dockerfile for container scan.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>4.4 Tooling Versions</h4>
+    <ul>
+      <li>Latest stable Snyk CLI (pin version at pilot start; record it).</li>
+      <li>VS Code Snyk extension (latest stable).</li>
+      <li>JetBrains Snyk plugin (IntelliJ IDEA / PyCharm / WebStorm).</li>
+      <li>OS mix: Windows + macOS (+ Linux if used by devs).</li>
+    </ul>
+  </div>
+</div>
+
+<h2 id="s5">5. Timeline</h2>
+<table>
+  <tr><th>Week</th><th>Phase</th><th>Activities</th></tr>
+  <tr><td>W0</td><td>Preparation</td><td>Finalize allowlist &amp; accounts; publish setup guide; participant onboarding session (45 min); distribute API tokens; smoke-test with Pilot Lead + Champions only.</td></tr>
+  <tr><td>W1</td><td>Setup &amp; Baseline</td><td>All 40 participants install CLI and/or IDE plugin, authenticate, run first <code>snyk test</code>. Record time-to-first-scan per participant. Baseline vulnerability counts per repo.</td></tr>
+  <tr><td>W2–W3</td><td>Core Testing</td><td>Execute assigned test-case matrix (Sections 6–8). Weekly feedback survey #1 and #2. Office-hours twice a week.</td></tr>
+  <tr><td>W4</td><td>Real-World Usage</td><td>Free-form usage on daily work: fix at least one finding per developer (where available), use ignore workflows, re-scan. Survey #3 + SUS/NPS questionnaire.</td></tr>
+  <tr><td>W5</td><td>Wrap-Up</td><td>Debrief interviews (8–10 participants), aggregate metrics, write pilot report, go/no-go recommendation for Phase 2 (Broker + SCM/CI integration).</td></tr>
+</table>
+
+<h2 id="s6">6. Test Cases — Snyk CLI</h2>
+<p>Each case lists ID, objective, steps summary, and expected result. Priority: <span class="badge b-p0">P0</span> must-pass, <span class="badge b-p1">P1</span> should-pass, <span class="badge b-p2">P2</span> nice-to-have.</p>
+
+<h3>6.1 Installation &amp; Authentication</h3>
+<table>
+  <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
+  <tr><td>CLI-01</td><td><span class="badge b-p0">P0</span></td><td>Install CLI via documented method (npm / standalone binary / brew) on each OS in scope.</td><td>Installs in &lt; 10 min without admin-rights workarounds; <code>snyk --version</code> works.</td></tr>
+  <tr><td>CLI-02</td><td><span class="badge b-p0">P0</span></td><td>Authenticate via <code>snyk auth</code> (browser SSO) from corporate network.</td><td>Auth flow completes through proxy; token stored; <code>snyk whoami</code> returns identity.</td></tr>
+  <tr><td>CLI-03</td><td><span class="badge b-p0">P0</span></td><td>Authenticate via API token env var (<code>SNYK_TOKEN</code>) for headless use.</td><td>Commands work without browser interaction.</td></tr>
+  <tr><td>CLI-04</td><td><span class="badge b-p0">P0</span></td><td>Run CLI behind corporate proxy with internal CA cert configured.</td><td>No TLS/cert errors; document exact env-var config needed.</td></tr>
+</table>
+
+<h3>6.2 Open Source Scanning (SCA)</h3>
+<table>
+  <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
+  <tr><td>CLI-10</td><td><span class="badge b-p0">P0</span></td><td><code>snyk test</code> on each representative repo (Maven, Gradle, npm, yarn, pnpm, pip, Poetry, Go modules).</td><td>Scan succeeds; dependency tree resolved; results consistent with ecosystem (spot-check vs. known CVE data).</td></tr>
+  <tr><td>CLI-11</td><td><span class="badge b-p0">P0</span></td><td>Run against the seeded repo with known vulnerable dependencies.</td><td>All seeded vulnerabilities detected with correct severity; no crashes.</td></tr>
+  <tr><td>CLI-12</td><td><span class="badge b-p0">P0</span></td><td>Scan repo whose dependencies resolve via internal registry (Nexus/Artifactory mirror).</td><td>Manifest/lockfile resolution succeeds without requiring internet access to public registries (or document required exceptions).</td></tr>
+  <tr><td>CLI-13</td><td><span class="badge b-p1">P1</span></td><td><code>snyk monitor</code> pushes project snapshot to Snyk UI.</td><td>Project appears in web UI under correct Org; re-runs update rather than duplicate.</td></tr>
+  <tr><td>CLI-14</td><td><span class="badge b-p1">P1</span></td><td>Monorepo: <code>snyk test --all-projects</code> (and per-manifest runs).</td><td>All manifests discovered and scanned; results attributable to correct sub-project.</td></tr>
+  <tr><td>CLI-15</td><td><span class="badge b-p1">P1</span></td><td>Machine-readable output: <code>--json</code> and <code>--sarif</code> output files.</td><td>Valid JSON/SARIF produced; parseable by downstream tooling (jq / SARIF viewer).</td></tr>
+  <tr><td>CLI-16</td><td><span class="badge b-p1">P1</span></td><td>Exit-code behavior: <code>--severity-threshold=high</code>, <code>--fail-on</code> variants.</td><td>Exit codes correctly reflect threshold (usable later in CI gates).</td></tr>
+  <tr><td>CLI-17</td><td><span class="badge b-p2">P2</span></td><td><code>snyk ignore</code> with expiry &amp; reason; verify suppression on re-scan.</td><td>Ignored issue suppressed locally &amp; reflected in UI; audit trail visible.</td></tr>
+  <tr><td>CLI-18</td><td><span class="badge b-p2">P2</span></td><td><code>snyk test --unmanaged</code> (C/C++ or vendored deps) if applicable.</td><td>Fingerprinting works or fails gracefully with clear message.</td></tr>
+</table>
+
+<h3>6.3 Snyk Code (SAST) &amp; IaC / Container</h3>
+<table>
+  <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
+  <tr><td>CLI-20</td><td><span class="badge b-p0">P0</span></td><td><code>snyk code test</code> on 3+ repos covering JS/TS, Java, Python.</td><td>Scan completes; findings shown with file/line, data-flow, severity; verify deeproxy endpoint reachable through proxy.</td></tr>
+  <tr><td>CLI-21</td><td><span class="badge b-p0">P0</span></td><td>False-positive review: security champion reviews top 20 Snyk Code findings.</td><td>FP rate measured; known-good code not flagged at critical severity without reason.</td></tr>
+  <tr><td>CLI-22</td><td><span class="badge b-p1">P1</span></td><td><code>snyk iac test</code> on Terraform and Kubernetes YAML samples.</td><td>Misconfigurations detected with remediation guidance; no blocking errors.</td></tr>
+  <tr><td>CLI-23</td><td><span class="badge b-p2">P2</span></td><td><code>snyk container test</code> on a locally built image (if Docker available on workstations).</td><td>Image scanned; base-image recommendations shown.</td></tr>
+  <tr><td>CLI-24</td><td><span class="badge b-p1">P1</span></td><td>Data-leakage check: confirm Snyk Code only sends required code context (review vendor doc + proxy logs).</td><td>Security team signs off that code-snippet transmission to deeproxy is acceptable under internal policy.</td></tr>
+</table>
+
+<h3>6.4 Performance &amp; Scale</h3>
+<table>
+  <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
+  <tr><td>CLI-30</td><td><span class="badge b-p1">P1</span></td><td>Scan-time measurement on the largest internal repo (record dependency count).</td><td><code>snyk test</code> &lt; 3 min; <code>snyk code test</code> &lt; 5 min for typical repo size (record actuals).</td></tr>
+  <tr><td>CLI-31</td><td><span class="badge b-p2">P2</span></td><td>Repeated scans within short window (rate-limit behavior).</td><td>No unexplained throttling at expected dev usage; document any plan limits hit.</td></tr>
+</table>
+
+<h2 id="s7">7. Test Cases — IDE Plugins</h2>
+<p>IDE group split: VS Code (n=6+) and JetBrains family (n=6+). Both tracks run the equivalent case set.</p>
+
+<h3>7.1 Installation &amp; Authentication</h3>
+<table>
+  <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
+  <tr><td>IDE-01</td><td><span class="badge b-p0">P0</span></td><td>Install Snyk extension from marketplace (VS Code) / plugin repository (JetBrains) from corporate network.</td><td>Installs without manual proxy hacks; plugin activates on startup.</td></tr>
+  <tr><td>IDE-02</td><td><span class="badge b-p0">P0</span></td><td>Authenticate plugin (SSO browser flow or token paste) behind corporate proxy.</td><td>Auth succeeds; plugin shows authenticated state; no repeated re-login prompts.</td></tr>
+  <tr><td>IDE-03</td><td><span class="badge b-p1">P1</span></td><td>Proxy/CA configuration inside IDE settings (where needed).</td><td>Documented steps work; errors clearly surfaced if misconfigured.</td></tr>
+</table>
+
+<h3>7.2 In-Editor Scanning &amp; Findings</h3>
+<table>
+  <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
+  <tr><td>IDE-10</td><td><span class="badge b-p0">P0</span></td><td>Open a project with known vulnerable dependencies; verify SCA findings panel populates.</td><td>Findings appear with severity, package, upgrade path; matches CLI results for same project.</td></tr>
+  <tr><td>IDE-11</td><td><span class="badge b-p0">P0</span></td><td>Snyk Code real-time analysis: introduce a simple vulnerability (e.g., SQL injection pattern) in a scratch branch.</td><td>Issue flagged in-editor within a reasonable time (&lt; 60 s after save) with explanation and data-flow view.</td></tr>
+  <tr><td>IDE-12</td><td><span class="badge b-p0">P0</span></td><td>Result consistency: compare IDE findings vs. CLI findings on same commit.</td><td>No unexplained discrepancies in critical/high findings.</td></tr>
+  <tr><td>IDE-13</td><td><span class="badge b-p1">P1</span></td><td>Fix workflow: apply suggested remediation (upgrade dependency / fix code) and re-scan.</td><td>Developer can resolve a finding end-to-end from the IDE; issue clears on re-scan.</td></tr>
+  <tr><td>IDE-14</td><td><span class="badge b-p1">P1</span></td><td>Editor annotations: inline highlights, hover details, problem-panel integration.</td><td>Annotations accurate, non-intrusive, and dismissible; severity styling clear.</td></tr>
+  <tr><td>IDE-15</td><td><span class="badge b-p2">P2</span></td><td>Scan configuration: enable/disable product toggles (OSS/Code/IaC), set severity filter, add <code>.snyk</code> policy / ignore.</td><td>Settings persist and take effect; ignores honored.</td></tr>
+  <tr><td>IDE-16</td><td><span class="badge b-p2">P2</span></td><td>Multi-root / monorepo workspace handling.</td><td>Plugin scans correct project roots; no duplicate or missing findings.</td></tr>
+</table>
+
+<h3>7.3 IDE Performance &amp; Stability</h3>
+<table>
+  <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
+  <tr><td>IDE-20</td><td><span class="badge b-p1">P1</span></td><td>Measure IDE startup impact with plugin enabled (before/after).</td><td>Startup degradation &lt; 10%; no noticeable typing lag on large files.</td></tr>
+  <tr><td>IDE-21</td><td><span class="badge b-p1">P1</span></td><td>Full-day stability: plugin enabled during normal work for 5 consecutive days.</td><td>No IDE crashes/freezes attributable to plugin; CPU/memory stays reasonable.</td></tr>
+  <tr><td>IDE-22</td><td><span class="badge b-p2">P2</span></td><td>Offline/unstable-network behavior (VPN drop, wifi loss).</td><td>Plugin degrades gracefully, queues or retries, no error spam.</td></tr>
+</table>
+
+<h2 id="s8">8. Cross-Cutting / Non-Functional Cases</h2>
+<table>
+  <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
+  <tr><td>XC-01</td><td><span class="badge b-p0">P0</span></td><td><strong>Network compatibility matrix:</strong> run CLI-04/IDE-02 from office LAN, VPN, and (if allowed) remote — capturing any blocked endpoints.</td><td>All endpoints documented; final allowlist confirmed with network team.</td></tr>
+  <tr><td>XC-02</td><td><span class="badge b-p0">P0</span></td><td><strong>Security &amp; data-governance review:</strong> what leaves the network (code snippets via deeproxy, dependency metadata, telemetry).</td><td>Security/privacy sign-off documented; policy-sensitive repos excluded if required.</td></tr>
+  <tr><td>XC-03</td><td><span class="badge b-p1">P1</span></td><td><strong>Documentation quality:</strong> a participant follows only the Snyk official docs + our setup guide to self-onboard.</td><td>≥ 80% complete setup unaided; doc gaps recorded.</td></tr>
+  <tr><td>XC-04</td><td><span class="badge b-p1">P1</span></td><td><strong>Org-level visibility:</strong> Pilot Lead views all monitored projects, filters by severity/tag in Snyk UI.</td><td>Reporting adequate for pilot metrics; gaps noted for Phase 2.</td></tr>
+  <tr><td>XC-05</td><td><span class="badge b-p2">P2</span></td><td><strong>License compliance (informational):</strong> review license findings on 2 repos.</td><td>License data useful; no action required this phase.</td></tr>
+</table>
+
+<h2 id="s9">9. Metrics &amp; Data Collection</h2>
+<h3>9.1 Quantitative Metrics</h3>
+<table>
+  <tr><th>Metric</th><th>How Measured</th><th>Target</th></tr>
+  <tr><td>Setup success rate</td><td>% of 40 participants who complete install + auth + first scan</td><td class="kpi">≥ 90%</td></tr>
+  <tr><td>Median time-to-first-scan</td><td>Self-reported + onboarding observation</td><td class="kpi">≤ 30 min</td></tr>
+  <tr><td>Scan success rate</td><td>Successful scans / total attempted (per logs &amp; weekly survey)</td><td class="kpi">≥ 95%</td></tr>
+  <tr><td>Detection accuracy</td><td>Seeded known vulnerabilities found / total seeded</td><td class="kpi">100% of Critical/High</td></tr>
+  <tr><td>Snyk Code false-positive rate</td><td>Champion-reviewed findings flagged as FP / total reviewed</td><td class="kpi">≤ 30%</td></tr>
+  <tr><td>Findings fixed during pilot</td><td>% of participants who fixed ≥ 1 real finding</td><td class="kpi">≥ 60%</td></tr>
+  <tr><td>CLI scan performance</td><td>Measured on largest repo (CLI-30)</td><td class="kpi">Within targets of CLI-30</td></tr>
+  <tr><td>Blocking network issues</td><td># of unresolved proxy/firewall blockers after W1</td><td class="kpi">0</td></tr>
+</table>
+<h3>9.2 Qualitative Metrics</h3>
+<table>
+  <tr><th>Metric</th><th>Instrument</th><th>Target</th></tr>
+  <tr><td>System Usability Scale (SUS)</td><td>W4 survey (CLI and IDE scored separately)</td><td class="kpi">≥ 68 (above-average usability)</td></tr>
+  <tr><td>Net Promoter Score ("recommend Snyk to a colleague?")</td><td>W4 survey</td><td class="kpi">≥ 20</td></tr>
+  <tr><td>Continued-use intent</td><td>% answering "would keep using after pilot"</td><td class="kpi">≥ 70%</td></tr>
+  <tr><td>Perceived noise level</td><td>% rating findings "mostly actionable"</td><td class="kpi">≥ 60%</td></tr>
+</table>
+<h3>9.3 Collection Mechanisms</h3>
+<ul>
+  <li>Weekly 5-minute survey (W1–W4): scans run, failures, blockers, notable findings.</li>
+  <li>Issue log (shared tracker): every bug/blocker tagged by component (CLI/IDE/network/docs) and severity.</li>
+  <li>Auto-collected: Snyk Org UI reports (projects monitored, issue counts by severity, fix activity).</li>
+  <li>W4: SUS + NPS questionnaire; W5: 30-min debrief interviews with 8–10 participants across groups.</li>
+</ul>
+
+<h2 id="s10">10. Success Criteria (Go/No-Go for Phase 2)</h2>
+<div class="callout ok"><strong>Overall rule:</strong> The pilot is <strong>SUCCESSFUL</strong> if all P0 criteria pass AND at least 6 of 8 aggregate thresholds below are met. A "conditional pass" (proceed with documented remediation) applies if exactly one P0 criterion fails with a clear vendor/config fix identified.</div>
+<table>
+  <tr><th>#</th><th>Criterion</th><th>Threshold</th><th>Type</th></tr>
+  <tr><td>SC-1</td><td>All P0 test cases (CLI-01→04, CLI-10→12, CLI-20→21, IDE-01→02, IDE-10→12, XC-01→02) executed with expected results, or failures root-caused with acceptable workaround</td><td>100% P0 executed; no open blocker</td><td><span class="badge b-p0">P0 gate</span></td></tr>
+  <tr><td>SC-2</td><td>Setup success rate across 40 participants</td><td class="kpi">≥ 90%</td><td>Aggregate</td></tr>
+  <tr><td>SC-3</td><td>Scan success rate (CLI + IDE)</td><td class="kpi">≥ 95%</td><td>Aggregate</td></tr>
+  <tr><td>SC-4</td><td>Seeded Critical/High vulnerabilities detected</td><td class="kpi">100%</td><td><span class="badge b-p0">P0 gate</span></td></tr>
+  <tr><td>SC-5</td><td>Snyk Code false-positive rate (champion-reviewed)</td><td class="kpi">≤ 30%</td><td>Aggregate</td></tr>
+  <tr><td>SC-6</td><td>Continued-use intent after pilot</td><td class="kpi">≥ 70% of participants</td><td>Aggregate</td></tr>
+  <tr><td>SC-7</td><td>SUS score (CLI and IDE, separately)</td><td class="kpi">≥ 68 each</td><td>Aggregate</td></tr>
+  <tr><td>SC-8</td><td>Zero unresolved corporate-network blockers (proxy/CA/allowlist)</td><td class="kpi">0 open</td><td><span class="badge b-p0">P0 gate</span></td></tr>
+  <tr><td>SC-9</td><td>Security/data-governance sign-off on outbound data (deeproxy etc.)</td><td class="kpi">Signed off</td><td><span class="badge b-p0">P0 gate</span></td></tr>
+  <tr><td>SC-10</td><td>Findings fixed by ≥ 60% of participants</td><td class="kpi">≥ 60%</td><td>Aggregate</td></tr>
+</table>
+<p><strong>Interpretation guidance:</strong> A low NPS with high detection accuracy suggests UX/education issues (fixable in rollout, not a vendor blocker). Low detection accuracy or unresolvable network incompatibility are vendor/architecture blockers and should trigger competitive re-evaluation before Phase 2 investment.</p>
+
+<h2 id="s11">11. Risks &amp; Mitigations</h2>
+<table>
+  <tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
+  <tr><td>Corporate proxy/CA blocks CLI or deeproxy traffic</td><td>High</td><td>Pre-pilot (W0) smoke test with network team; maintain documented allowlist; fallback: token-based auth + explicit proxy config.</td></tr>
+  <tr><td>Internal registry (Nexus/Artifactory) breaks dependency resolution</td><td>High</td><td>Dedicated test case CLI-12 in W1; capture failing manifests early; engage Snyk support during pilot.</td></tr>
+  <tr><td>Security team objects to code snippets leaving network (Snyk Code)</td><td>High</td><td>Run XC-02 review in W0/W1; if rejected, scope Phase 1 to SCA only and defer SAST decision.</td></tr>
+  <tr><td>Participant drop-off / survey fatigue</td><td>Medium</td><td>Keep weekly survey ≤ 5 min; office-hours twice weekly; manager endorsement; small incentives.</td></tr>
+  <tr><td>Plan limits (test counts) hit during heavy scanning</td><td>Medium</td><td>Confirm limits with vendor in W0; monitor usage in Org UI weekly.</td></tr>
+  <tr><td>Results skewed by unrepresentative repos</td><td>Medium</td><td>Repo selection reviewed by Security Champions; ensure ≥ 4 languages and legacy + modern codebases.</td></tr>
+  <tr><td>False-positive fatigue biases feedback negative</td><td>Low–Med</td><td>Teach ignore/severity-threshold workflows in onboarding; measure FP objectively via champion review, not only sentiment.</td></tr>
+</table>
+
+<h2 id="s12">12. Exit Criteria &amp; Next Phase</h2>
+<h3>12.1 Pilot Exit Criteria</h3>
+<ul>
+  <li>All test cases executed (pass/fail recorded); issue log triaged to zero untriaged items.</li>
+  <li>Metrics aggregated; final pilot report written with per-criterion verdicts.</li>
+  <li>Go/no-go recommendation presented to stakeholders with:</li>
+  <ul>
+    <li>Success-criteria scorecard (Section 10),</li>
+    <li>Top issues &amp; vendor support experience,</li>
+    <li>Phase 2 requirements (Broker architecture, endpoint allowlist delta, SCM/CI integration plan, estimated effort).</li>
+  </ul>
+</ul>
+<h3>12.2 Phase 2 Preview (Post-Broker)</h3>
+<ul>
+  <li>Deploy Snyk Broker; integrate internal GitLab/GitHub Enterprise for repo import &amp; automated fix PRs.</li>
+  <li>CI gate design using validated exit-code/severity-threshold behavior from CLI-16.</li>
+  <li>Policy &amp; governance setup; expand to full engineering org based on Phase 1 SUS/NPS learnings.</li>
+</ul>
+
+<h2 id="app">Appendix — Weekly Feedback Template</h2>
+<div class="card">
+  <h4>Pilot Participant Weekly Survey (≤ 5 min)</h4>
+  <ol>
+    <li>Which tools did you use this week? ☐ CLI ☐ VS Code plugin ☐ JetBrains plugin</li>
+    <li>How many scans did you run? (roughly)</li>
+    <li>Did any scan fail or behave unexpectedly? (describe + attach command/error)</li>
+    <li>Did you hit any network/proxy/certificate issues?</li>
+    <li>Did Snyk find anything real &amp; useful? Did you fix anything?</li>
+    <li>Any finding you believe is a false positive? (link/screenshot)</li>
+    <li>Rate this week's experience: 1 (frustrating) – 5 (smooth)</li>
+    <li>Anything blocking you next week?</li>
+  </ol>
+</div>
+
+<footer>
+  Snyk Internal Pilot Testing Plan — Phase 1 (CLI &amp; IDE, pre-Broker). Generated 2026-08-04. Internal use only.
+</footer>
+
+</div>
+</body>
+</html>
