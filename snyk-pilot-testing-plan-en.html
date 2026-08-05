@@ -55,13 +55,13 @@
 
 <header class="doc">
   <h1>Snyk Internal Pilot Testing Plan</h1>
-  <div class="sub">Phase 1 — CLI &amp; IDE Integration Testing (Pre-Broker Deployment)</div>
+  <div class="sub">Phase 1 — CLI &amp; IDE Testing (Pre-Broker) · SAST + SCA + IaC Only</div>
   <div class="meta">
-    <span>Version: 1.0</span>
-    <span>Date: 2026-08-04</span>
+    <span>Version: 1.1</span>
+    <span>Date: 2026-08-05</span>
     <span>Pilot Size: ~40 Developers</span>
-    <span>Scope: Snyk CLI + IDE Plugins</span>
-    <span>Out of Scope: Snyk Broker, CI/CD Integration, SCM Integration</span>
+    <span>Scope: SAST (Snyk Code) + SCA (Open Source) + IaC, via CLI + IDE</span>
+    <span>Out of Scope: Snyk Broker, Snyk Container, CI/CD &amp; SCM Integration</span>
   </div>
 </header>
 
@@ -83,10 +83,11 @@
 </ol>
 
 <h2 id="s1">1. Background &amp; Objectives</h2>
-<p>We have decided to run an internal pilot of Snyk. Because the <strong>Snyk Broker</strong> solution (required for connecting Snyk to our internal/private repositories behind the firewall) has <strong>not yet been deployed</strong>, this first pilot phase is limited to <strong>Snyk CLI</strong> and <strong>IDE plugin</strong> workflows, both of which operate from the developer workstation and do not depend on the Broker.</p>
+<p>We have decided to run an internal pilot of Snyk. Because the <strong>Snyk Broker</strong> service (required for connecting Snyk to our internal/private repositories behind the firewall) <strong>cannot be deployed in the corporate intranet in the short term</strong>, all Broker-dependent capabilities are deferred to Phase 2. This first pilot phase is therefore limited to <strong>Snyk CLI</strong> and <strong>IDE plugin</strong> workflows, which operate from the developer workstation and do not depend on the Broker.</p>
+<p>In addition, this pilot covers <strong>three Snyk capabilities only: SAST (Snyk Code), SCA (Open Source), and IaC</strong>. Other Snyk products and capabilities — including Snyk Container, license compliance, and reporting/governance features — are <strong>not</strong> part of this pilot.</p>
 <h3>1.1 Objectives</h3>
 <ul>
-  <li><strong>Validate core value:</strong> confirm Snyk can accurately detect vulnerabilities (SCA + SAST) in our real internal codebases via CLI and IDE.</li>
+  <li><strong>Validate core value:</strong> confirm Snyk can accurately detect vulnerabilities (SCA), code issues (SAST), and misconfigurations (IaC) in our real internal codebases via CLI and IDE.</li>
   <li><strong>Evaluate developer experience:</strong> measure installation friction, scan speed, result readability, fix workflow, and false-positive burden in day-to-day development.</li>
   <li><strong>Verify internal-network compatibility:</strong> confirm CLI/IDE work within our corporate network (proxy, firewall, internal package registries such as Nexus/Artifactory, internal CA certificates).</li>
   <li><strong>Collect adoption signals:</strong> understand whether developers would keep using Snyk after the pilot, before we invest in Broker deployment and broader rollout.</li>
@@ -95,28 +96,29 @@
 
 <h2 id="s2">2. Scope Definition</h2>
 <table>
-  <tr><th style="width:50%">In Scope (Phase 1)</th><th>Out of Scope (Deferred to Phase 2)</th></tr>
+  <tr><th style="width:50%">In Scope (Phase 1)</th><th>Out of Scope (Deferred / Excluded)</th></tr>
   <tr>
     <td>
-      <span class="badge b-scope">IN</span> Snyk CLI — <code>snyk test</code>, <code>snyk monitor</code>, <code>snyk code test</code>, <code>snyk iac test</code>, <code>snyk container test</code> (if Docker available)<br>
+      <span class="badge b-scope">IN</span> Snyk CLI — <code>snyk test</code>, <code>snyk monitor</code>, <code>snyk code test</code>, <code>snyk iac test</code><br>
       <span class="badge b-scope">IN</span> Snyk IDE plugins — VS Code and JetBrains (IntelliJ IDEA / others)<br>
-      <span class="badge b-scope">IN</span> Open-source dependency scanning (SCA) + Snyk Code (SAST)<br>
+      <span class="badge b-scope">IN</span> Capabilities: <strong>SCA</strong> (open-source dependency scanning) + <strong>SAST</strong> (Snyk Code) + <strong>IaC</strong> (Terraform / Kubernetes YAML)<br>
       <span class="badge b-scope">IN</span> Corporate proxy / internal registry / internal CA configuration<br>
       <span class="badge b-scope">IN</span> Snyk web UI (viewing results pushed by <code>snyk monitor</code>)<br>
       <span class="badge b-scope">IN</span> Authentication via SSO / API token from workstation
     </td>
     <td>
-      <span class="badge b-out">OUT</span> Snyk Broker deployment &amp; configuration<br>
+      <span class="badge b-out">OUT</span> <strong>Snyk Broker</strong> deployment &amp; configuration — cannot be set up in the intranet short-term; deferred to Phase 2<br>
+      <span class="badge b-out">OUT</span> <strong>Snyk Container</strong> (image scanning) — not part of this pilot<br>
+      <span class="badge b-out">OUT</span> License compliance features — not evaluated in this pilot<br>
       <span class="badge b-out">OUT</span> SCM integration (GitLab/GitHub Enterprise/Bitbucket Server import)<br>
       <span class="badge b-out">OUT</span> CI/CD pipeline integration (Jenkins/GitLab CI gates)<br>
       <span class="badge b-out">OUT</span> Automated PR/MR fix workflows via SCM<br>
       <span class="badge b-out">OUT</span> Jira / Slack integrations<br>
-      <span class="badge b-out">OUT</span> Policy-as-code / Org-wide governance rules<br>
-      <span class="badge b-out">OUT</span> License compliance policy enforcement (informational only)
+      <span class="badge b-out">OUT</span> Policy-as-code / Org-wide governance rules
     </td>
   </tr>
 </table>
-<div class="callout warn"><strong>Note:</strong> Any test case that requires the Broker (e.g., scanning private Git repos directly from the Snyk UI) is explicitly excluded. Phase 1 findings will inform Broker requirements for Phase 2.</div>
+<div class="callout warn"><strong>Note:</strong> Any test case that requires the Broker (e.g., scanning private Git repos directly from the Snyk UI) is explicitly excluded — the Broker service cannot be set up in our internal network in the short term and remains the gating dependency for Phase 2. Likewise, test cases are limited to SAST, SCA, and IaC; no Container or other Snyk capabilities are tested in this phase.</div>
 
 <h2 id="s3">3. Pilot Team &amp; Grouping</h2>
 <p>~40 developers will be recruited across teams and technology stacks to ensure representative coverage.</p>
@@ -125,7 +127,7 @@
   <tr><td><strong>A — CLI Core</strong></td><td>12</td><td>Backend developers (Java / Node.js / Python / Go)</td><td><code>snyk test</code>/<code>snyk monitor</code> on real services; internal registry compatibility</td></tr>
   <tr><td><strong>B — IDE Core</strong></td><td>12</td><td>Split: 6 VS Code users, 6 JetBrains users</td><td>IDE plugin install, real-time scanning, fix suggestions, UX</td></tr>
   <tr><td><strong>C — SAST / Snyk Code</strong></td><td>8</td><td>Full-stack &amp; frontend developers</td><td><code>snyk code test</code> accuracy, false-positive rate, language coverage</td></tr>
-  <tr><td><strong>D — Extended Scenarios</strong></td><td>8</td><td>Mixed: DevOps-leaning devs, mobile/desktop devs</td><td>Monorepo, multi-manifest, IaC (<code>snyk iac test</code>), container scan, edge cases</td></tr>
+  <tr><td><strong>D — Extended Scenarios</strong></td><td>8</td><td>Mixed: DevOps-leaning devs, mobile/desktop devs</td><td>Monorepo, multi-manifest, IaC (<code>snyk iac test</code>), edge cases</td></tr>
 </table>
 <h3>3.1 Roles</h3>
 <ul>
@@ -148,7 +150,7 @@
       <li>Snyk Organization created; pilot group(s) configured.</li>
       <li>40 seats provisioned; SSO (or invited accounts) enabled.</li>
       <li>API tokens distributable to CLI users.</li>
-      <li>Confirm plan limits (test counts for Snyk Code / Container) fit pilot volume.</li>
+      <li>Confirm plan limits (test counts for Snyk Code / IaC) fit pilot volume.</li>
     </ul>
   </div>
   <div class="card">
@@ -165,7 +167,7 @@
       <li>6–10 representative internal repos (varied languages/build tools: Maven/Gradle, npm/yarn/pnpm, pip/Poetry, Go modules).</li>
       <li>At least 1 monorepo and 1 repo with multiple manifests.</li>
       <li>1 repo with known vulnerable dependency versions (seeded, non-production) for detection validation.</li>
-      <li>Optional: Terraform/K8s YAML samples for IaC; a Dockerfile for container scan.</li>
+      <li>Terraform / Kubernetes YAML samples for IaC scanning.</li>
     </ul>
   </div>
   <div class="card">
@@ -215,14 +217,13 @@
   <tr><td>CLI-18</td><td><span class="badge b-p2">P2</span></td><td><code>snyk test --unmanaged</code> (C/C++ or vendored deps) if applicable.</td><td>Fingerprinting works or fails gracefully with clear message.</td></tr>
 </table>
 
-<h3>6.3 Snyk Code (SAST) &amp; IaC / Container</h3>
+<h3>6.3 Snyk Code (SAST) &amp; IaC</h3>
 <table>
   <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
   <tr><td>CLI-20</td><td><span class="badge b-p0">P0</span></td><td><code>snyk code test</code> on 3+ repos covering JS/TS, Java, Python.</td><td>Scan completes; findings shown with file/line, data-flow, severity; verify deeproxy endpoint reachable through proxy.</td></tr>
   <tr><td>CLI-21</td><td><span class="badge b-p0">P0</span></td><td>False-positive review: security champion reviews top 20 Snyk Code findings.</td><td>FP rate measured; known-good code not flagged at critical severity without reason.</td></tr>
   <tr><td>CLI-22</td><td><span class="badge b-p1">P1</span></td><td><code>snyk iac test</code> on Terraform and Kubernetes YAML samples.</td><td>Misconfigurations detected with remediation guidance; no blocking errors.</td></tr>
-  <tr><td>CLI-23</td><td><span class="badge b-p2">P2</span></td><td><code>snyk container test</code> on a locally built image (if Docker available on workstations).</td><td>Image scanned; base-image recommendations shown.</td></tr>
-  <tr><td>CLI-24</td><td><span class="badge b-p1">P1</span></td><td>Data-leakage check: confirm Snyk Code only sends required code context (review vendor doc + proxy logs).</td><td>Security team signs off that code-snippet transmission to deeproxy is acceptable under internal policy.</td></tr>
+  <tr><td>CLI-23</td><td><span class="badge b-p1">P1</span></td><td>Data-leakage check: confirm Snyk Code only sends required code context (review vendor doc + proxy logs).</td><td>Security team signs off that code-snippet transmission to deeproxy is acceptable under internal policy.</td></tr>
 </table>
 
 <h3>6.4 Performance &amp; Scale</h3>
@@ -233,7 +234,7 @@
 </table>
 
 <h2 id="s7">7. Test Cases — IDE Plugins</h2>
-<p>IDE group split: VS Code (n=6+) and JetBrains family (n=6+). Both tracks run the equivalent case set.</p>
+<p>IDE group split: VS Code (n=6+) and JetBrains family (n=6+). Both tracks run the equivalent case set, limited to SAST, SCA, and IaC features of the plugin.</p>
 
 <h3>7.1 Installation &amp; Authentication</h3>
 <table>
@@ -270,7 +271,6 @@
   <tr><td>XC-02</td><td><span class="badge b-p0">P0</span></td><td><strong>Security &amp; data-governance review:</strong> what leaves the network (code snippets via deeproxy, dependency metadata, telemetry).</td><td>Security/privacy sign-off documented; policy-sensitive repos excluded if required.</td></tr>
   <tr><td>XC-03</td><td><span class="badge b-p1">P1</span></td><td><strong>Documentation quality:</strong> a participant follows only the Snyk official docs + our setup guide to self-onboard.</td><td>≥ 80% complete setup unaided; doc gaps recorded.</td></tr>
   <tr><td>XC-04</td><td><span class="badge b-p1">P1</span></td><td><strong>Org-level visibility:</strong> Pilot Lead views all monitored projects, filters by severity/tag in Snyk UI.</td><td>Reporting adequate for pilot metrics; gaps noted for Phase 2.</td></tr>
-  <tr><td>XC-05</td><td><span class="badge b-p2">P2</span></td><td><strong>License compliance (informational):</strong> review license findings on 2 repos.</td><td>License data useful; no action required this phase.</td></tr>
 </table>
 
 <h2 id="s9">9. Metrics &amp; Data Collection</h2>
@@ -324,7 +324,8 @@
   <tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
   <tr><td>Corporate proxy/CA blocks CLI or deeproxy traffic</td><td>High</td><td>Pre-pilot (W0) smoke test with network team; maintain documented allowlist; fallback: token-based auth + explicit proxy config.</td></tr>
   <tr><td>Internal registry (Nexus/Artifactory) breaks dependency resolution</td><td>High</td><td>Dedicated test case CLI-12 in W1; capture failing manifests early; engage Snyk support during pilot.</td></tr>
-  <tr><td>Security team objects to code snippets leaving network (Snyk Code)</td><td>High</td><td>Run XC-02 review in W0/W1; if rejected, scope Phase 1 to SCA only and defer SAST decision.</td></tr>
+  <tr><td>Security team objects to code snippets leaving network (Snyk Code)</td><td>High</td><td>Run XC-02 review in W0/W1; if rejected, scope Phase 1 to SCA + IaC only and defer SAST decision.</td></tr>
+  <tr><td>Broker cannot be deployed in the intranet short-term, blocking Phase 2 planning</td><td>Medium</td><td>Accept as a Phase 2 gating dependency; use Phase 1 network findings (XC-01) to pre-draft Broker architecture, host, and allowlist requirements so Phase 2 can start immediately once deployment is feasible.</td></tr>
   <tr><td>Participant drop-off / survey fatigue</td><td>Medium</td><td>Keep weekly survey ≤ 5 min; office-hours twice weekly; manager endorsement; small incentives.</td></tr>
   <tr><td>Plan limits (test counts) hit during heavy scanning</td><td>Medium</td><td>Confirm limits with vendor in W0; monitor usage in Org UI weekly.</td></tr>
   <tr><td>Results skewed by unrepresentative repos</td><td>Medium</td><td>Repo selection reviewed by Security Champions; ensure ≥ 4 languages and legacy + modern codebases.</td></tr>
@@ -345,9 +346,11 @@
 </ul>
 <h3>12.2 Phase 2 Preview (Post-Broker)</h3>
 <ul>
-  <li>Deploy Snyk Broker; integrate internal GitLab/GitHub Enterprise for repo import &amp; automated fix PRs.</li>
+  <li><strong>Broker deployment is the gating dependency for Phase 2</strong> — it cannot be set up in the corporate intranet in the short term; revisit the deployment timeline with the network/security teams and use Phase 1 network findings (XC-01) to pre-draft the Broker host, architecture, and allowlist requirements.</li>
+  <li>Once Broker is available: integrate internal GitLab/GitHub Enterprise for repo import &amp; automated fix PRs.</li>
   <li>CI gate design using validated exit-code/severity-threshold behavior from CLI-16.</li>
   <li>Policy &amp; governance setup; expand to full engineering org based on Phase 1 SUS/NPS learnings.</li>
+  <li>Snyk Container and other Snyk capabilities remain out of scope and would require a separate evaluation if needed later.</li>
 </ul>
 
 <h2 id="app">Appendix — Weekly Feedback Template</h2>
@@ -366,7 +369,7 @@
 </div>
 
 <footer>
-  Snyk Internal Pilot Testing Plan — Phase 1 (CLI &amp; IDE, pre-Broker). Generated 2026-08-04. Internal use only.
+  Snyk Internal Pilot Testing Plan — Phase 1 (CLI &amp; IDE, pre-Broker; SAST + SCA + IaC only). v1.1, updated 2026-08-05. Internal use only.
 </footer>
 
 </div>
