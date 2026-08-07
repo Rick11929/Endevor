@@ -58,13 +58,14 @@
 
 <header class="doc">
   <h1>Snyk Internal Pilot Testing Plan</h1>
-  <div class="sub">Phase 1 — CLI &amp; IDE Testing (Pre-Broker) · SAST + SCA + IaC Only</div>
+  <div class="sub">Phase 1 — CLI &amp; IDE Testing (Pre-Broker) · SAST + SCA + IaC Only · One End-of-Pilot Questionnaire Drives the Score</div>
   <div class="meta">
-    <span>Version: 1.4</span>
+    <span>Version: 1.7</span>
     <span>Date: 2026-08-07</span>
     <span>Pilot Size: ~40 Developers</span>
     <span>Scope: SAST (Snyk Code) + SCA (Open Source) + IaC, via CLI + IDE</span>
     <span>Out of Scope: Snyk Broker, Snyk Container, CI/CD &amp; SCM Integration</span>
+    <span>Staffing: Pilot Lead + 40 testers (no dedicated Security Champion)</span>
   </div>
 </header>
 
@@ -78,17 +79,17 @@
   <li><a href="#s6">6. Test Cases — CLI</a></li>
   <li><a href="#s7">7. Test Cases — IDE</a></li>
   <li><a href="#s8">8. Cross-Cutting / Non-Functional Cases</a></li>
-  <li><a href="#s9">9. Metrics — Test-Case-Linked Scorecard</a></li>
+  <li><a href="#s9">9. Metrics — How the Questionnaire Produces Every Number</a></li>
   <li><a href="#s10">10. Success Criteria</a></li>
   <li><a href="#s11">11. Risks &amp; Mitigations</a></li>
   <li><a href="#s12">12. Exit Criteria &amp; Next Phase</a></li>
-  <li><a href="#app">Appendix A — Weekly Feedback Template</a></li>
-  <li><a href="#appb">Appendix B — W4 Mini-Survey &amp; Scoring</a></li>
+  <li><a href="#app">Appendix A — End-of-Pilot Questionnaire (scoring instrument)</a></li>
 </ol>
 
 <h2 id="s1">1. Background &amp; Objectives</h2>
 <p>We have decided to run an internal pilot of Snyk. Because the <strong>Snyk Broker</strong> service (required for connecting Snyk to our internal/private repositories behind the firewall) <strong>cannot be deployed in the corporate intranet in the short term</strong>, all Broker-dependent capabilities are deferred to Phase 2. This first pilot phase is therefore limited to <strong>Snyk CLI</strong> and <strong>IDE plugin</strong> workflows, which operate from the developer workstation and do not depend on the Broker.</p>
 <p>In addition, this pilot covers <strong>three Snyk capabilities only: SAST (Snyk Code), SCA (Open Source), and IaC</strong>. Other Snyk products and capabilities — including Snyk Container, license compliance, and reporting/governance features — are <strong>not</strong> part of this pilot.</p>
+<p><strong>Staffing constraint:</strong> this pilot has <strong>no dedicated Security Champion</strong>. The measurement model is therefore deliberately simple: <strong>testers run the test cases, then fill in one end-of-pilot questionnaire (Appendix A, 20 questions, mostly counts and Yes/No). Every success criterion in Section 10 is a formula over those answers</strong>, computed automatically in the scorecard workbook (<code>snyk-pilot-scorecard-v3.xlsx</code>). Objective anchors run by the Pilot Lead (a seeded vulnerable repo, a network checklist, a governance sign-off) cover the few criteria a questionnaire cannot measure.</p>
 <h3>1.1 Objectives</h3>
 <ul>
   <li><strong>Validate core value:</strong> confirm Snyk can accurately detect vulnerabilities (SCA), code issues (SAST), and misconfigurations (IaC) in our real internal codebases via CLI and IDE.</li>
@@ -131,21 +132,22 @@
   <tr><th>Group</th><th>Size</th><th>Profile</th><th>Primary Focus</th></tr>
   <tr><td><strong>A — CLI Core</strong></td><td>12</td><td>Backend developers (Java / Node.js / Python / Go)</td><td><code>snyk test</code>/<code>snyk monitor</code> on real services; internal registry compatibility</td></tr>
   <tr><td><strong>B — IDE Core</strong></td><td>12</td><td>Split: 6 VS Code users, 6 JetBrains users</td><td>IDE plugin install, real-time scanning, fix suggestions, UX</td></tr>
-  <tr><td><strong>C — SAST / Snyk Code</strong></td><td>8</td><td>Full-stack &amp; frontend developers</td><td><code>snyk code test</code> accuracy, false-positive rate, language coverage</td></tr>
+  <tr><td><strong>C — SAST / Snyk Code</strong></td><td>8</td><td>Full-stack &amp; frontend developers</td><td><code>snyk code test</code> accuracy, self-labeled false-positive counting (CLI-21), language coverage</td></tr>
   <tr><td><strong>D — Extended Scenarios</strong></td><td>8</td><td>Mixed: DevOps-leaning devs, mobile/desktop devs</td><td>Monorepo, multi-manifest, IaC (<code>snyk iac test</code>), edge cases</td></tr>
 </table>
 <p>All groups execute the <strong>finding triage workflow</strong> cases (Section 6.4) on their own findings during W2–W4.</p>
-<h3>3.1 Roles</h3>
+<h3>3.1 Roles (no Security Champion)</h3>
 <ul>
-  <li><strong>Pilot Lead (1):</strong> owns plan execution, triages issues, interfaces with Snyk vendor/support.</li>
-  <li><strong>Security Champion(s) (1–2):</strong> validates severity/false-positive assessments, owns the weekly triage review, defines baseline expectations.</li>
-  <li><strong>Pilot Participants (40):</strong> execute assigned test cases, triage their findings, file feedback weekly.</li>
+  <li><strong>Pilot Lead (1):</strong> owns plan execution; runs the objective-anchor cases personally (CLI-11 seeded repo, XC-01 network matrix, XC-02 governance checklist, CLI-30 / IDE-20 timings); maintains the issue log; runs the weekly 30-min triage review (TRI-06); first escalation point for disputed findings (TRI-05); files Snyk vendor support tickets; distributes the questionnaire at the end of W4 and enters answers into the scorecard workbook.</li>
+  <li><strong>Pilot Participants (40):</strong> execute assigned test cases, label their own Snyk Code findings TP/FP/Unsure using the rubric (CLI-21), triage their findings, jot down their counts as they go (a simple tally is enough), and fill in <strong>one end-of-pilot questionnaire</strong> (≤ 10 min, Appendix A).</li>
+  <li><strong>Vendor support (Snyk):</strong> replaces expert judgment for disputes the Pilot Lead cannot resolve — any contested severity/FP call becomes a vendor ticket.</li>
 </ul>
+<div class="callout"><strong>Why this works without a Security Champion:</strong> detection quality is anchored <em>objectively</em> by the seeded repo (CLI-11 — we know exactly what should be found); the false-positive rate is <em>counted</em> from tester self-labels using a strict rubric (CLI-21) rather than judged by an expert; disputed calls escalate to the Pilot Lead and then to the vendor. The trade-off (self-reported counts with end-of-pilot recall) and its mitigations are documented in Section 11.</div>
 <h3>3.2 Selection Criteria for Participants</h3>
 <ul>
   <li>Works on an actively maintained internal repository with real dependencies.</li>
   <li>Mix of seniority levels (at least 25% junior/mid to surface usability friction).</li>
-  <li>Willing to commit ~1–2 hours/week for 4–6 weeks and complete weekly surveys.</li>
+  <li>Willing to commit ~1–2 hours/week for 4–6 weeks and complete the end-of-pilot questionnaire.</li>
 </ul>
 
 <h2 id="s4">4. Environment &amp; Prerequisites</h2>
@@ -172,7 +174,7 @@
     <ul>
       <li>6–10 representative internal repos (varied languages/build tools: Maven/Gradle, npm/yarn/pnpm, pip/Poetry, Go modules).</li>
       <li>At least 1 monorepo and 1 repo with multiple manifests.</li>
-      <li>1 repo with known vulnerable dependency versions (seeded, non-production) for detection validation.</li>
+      <li>1 repo with known vulnerable dependency versions (seeded, non-production) for detection validation — managed by the Pilot Lead.</li>
       <li>Terraform / Kubernetes YAML samples for IaC scanning.</li>
     </ul>
   </div>
@@ -190,11 +192,11 @@
 <h2 id="s5">5. Timeline</h2>
 <table>
   <tr><th>Week</th><th>Phase</th><th>Activities</th></tr>
-  <tr><td>W0</td><td>Preparation</td><td>Finalize allowlist &amp; accounts; publish setup guide; participant onboarding session (45 min, incl. triage workflow demo); distribute API tokens; smoke-test with Pilot Lead + Champions only.</td></tr>
-  <tr><td>W1</td><td>Setup &amp; Baseline</td><td>All 40 participants install CLI and/or IDE plugin, authenticate, run first <code>snyk test</code>. Record time-to-first-scan per participant. Baseline vulnerability counts per repo.</td></tr>
-  <tr><td>W2–W3</td><td>Core Testing</td><td>Execute assigned test-case matrix (Sections 6–8), including finding triage workflow (TRI-xx); record every case result in the scorecard workbook (<code>snyk-pilot-scorecard.xlsx</code>). Weekly feedback survey #1 and #2; weekly 30-min triage review with Champions. Office-hours twice a week.</td></tr>
-  <tr><td>W4</td><td>Real-World Usage</td><td>Free-form usage on daily work: triage and fix at least one finding per developer (where available), use ignore workflows, re-scan. Survey #3 + W4 mini-survey (5 questions, Appendix B).</td></tr>
-  <tr><td>W5</td><td>Wrap-Up</td><td>Debrief interviews (8–10 participants), finalize scorecard workbook, write pilot report, go/no-go recommendation for Phase 2 (Broker + SCM/CI integration).</td></tr>
+  <tr><td>W0</td><td>Preparation</td><td>Finalize allowlist &amp; accounts; publish setup guide + TP/FP labeling rubric + a one-page "tally sheet" so testers can jot down counts (scans, failures, TP/FP, fixes, triage minutes) as they go; participant onboarding session (45 min, incl. triage workflow + rubric demo); distribute API tokens; Pilot Lead smoke-tests all P0 cases.</td></tr>
+  <tr><td>W1</td><td>Setup &amp; Baseline</td><td>All 40 participants install CLI and/or IDE plugin, authenticate, run first <code>snyk test</code>. <strong>Each tester writes down: setup done Y/N, needed help Y/N, minutes to first scan</strong> (asked again in the end-of-pilot questionnaire). Baseline vulnerability counts per repo.</td></tr>
+  <tr><td>W2–W3</td><td>Core Testing</td><td>Execute assigned test-case matrix (Sections 6–8); testers keep their tally sheet up to date; Pilot Lead runs the weekly 30-min triage review (TRI-06). Office-hours twice a week.</td></tr>
+  <tr><td>W4</td><td>Real-World Usage + Questionnaire</td><td>Free-form usage on daily work: triage and fix at least one finding per developer, use ignore workflows, re-scan. <strong>End of W4: every tester fills in the end-of-pilot questionnaire (Appendix A, ≤ 10 min)</strong>; Pilot Lead enters answers into the scorecard workbook.</td></tr>
+  <tr><td>W5</td><td>Wrap-Up</td><td>Debrief interviews (8–10 participants), finalize scorecard workbook (metrics + verdicts compute automatically), write pilot report, go/no-go recommendation for Phase 2 (Broker + SCM/CI integration).</td></tr>
 </table>
 
 <h2 id="s6">6. Test Cases — Snyk CLI</h2>
@@ -213,7 +215,7 @@
 <table>
   <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
   <tr><td>CLI-10</td><td><span class="badge b-p0">P0</span></td><td><code>snyk test</code> on each representative repo (Maven, Gradle, npm, yarn, pnpm, pip, Poetry, Go modules).</td><td>Scan succeeds; dependency tree resolved; results consistent with ecosystem (spot-check vs. known CVE data).</td></tr>
-  <tr><td>CLI-11</td><td><span class="badge b-p0">P0</span></td><td>Run against the seeded repo with known vulnerable dependencies.</td><td>All seeded vulnerabilities detected with correct severity; no crashes.</td></tr>
+  <tr><td>CLI-11</td><td><span class="badge b-p0">P0</span></td><td><strong>Objective anchor (run by Pilot Lead):</strong> scan the seeded repo with known vulnerable dependencies.</td><td>All seeded Critical/High vulnerabilities detected with correct severity (found ÷ seeded is recorded as metric M-4); no crashes.</td></tr>
   <tr><td>CLI-12</td><td><span class="badge b-p0">P0</span></td><td>Scan repo whose dependencies resolve via internal registry (Nexus/Artifactory mirror).</td><td>Manifest/lockfile resolution succeeds without requiring internet access to public registries (or document required exceptions).</td></tr>
   <tr><td>CLI-13</td><td><span class="badge b-p1">P1</span></td><td><code>snyk monitor</code> pushes project snapshot to Snyk UI.</td><td>Project appears in web UI under correct Org; re-runs update rather than duplicate.</td></tr>
   <tr><td>CLI-14</td><td><span class="badge b-p1">P1</span></td><td>Monorepo: <code>snyk test --all-projects</code> (and per-manifest runs).</td><td>All manifests discovered and scanned; results attributable to correct sub-project.</td></tr>
@@ -227,21 +229,30 @@
 <table>
   <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
   <tr><td>CLI-20</td><td><span class="badge b-p0">P0</span></td><td><code>snyk code test</code> on 3+ repos covering JS/TS, Java, Python.</td><td>Scan completes; findings shown with file/line, data-flow, severity; verify deeproxy endpoint reachable through proxy.</td></tr>
-  <tr><td>CLI-21</td><td><span class="badge b-p0">P0</span></td><td>False-positive review: security champion reviews top 20 Snyk Code findings.</td><td>FP rate measured; known-good code not flagged at critical severity without reason.</td></tr>
+  <tr><td>CLI-21</td><td><span class="badge b-p0">P0</span></td><td><strong>Structured FP self-labeling (tester-driven, no Champion):</strong> every Group C tester labels ≥ 10 of their Snyk Code findings using the rubric below; the counts (TP / FP / Unsure) are reported in the end-of-pilot questionnaire (Q6–Q9).</td><td>Labels recorded for ≥ 80 findings across the group; M-6 = ΣFP ÷ Σ(TP+FP) computable from questionnaire answers; "Unsure" items reviewed with Pilot Lead, unresolved ones become vendor tickets.</td></tr>
   <tr><td>CLI-22</td><td><span class="badge b-p1">P1</span></td><td><code>snyk iac test</code> on Terraform and Kubernetes YAML samples.</td><td>Misconfigurations detected with remediation guidance; no blocking errors.</td></tr>
-  <tr><td>CLI-23</td><td><span class="badge b-p1">P1</span></td><td>Data-leakage check: confirm Snyk Code only sends required code context (review vendor doc + proxy logs).</td><td>Security team signs off that code-snippet transmission to deeproxy is acceptable under internal policy.</td></tr>
+  <tr><td>CLI-23</td><td><span class="badge b-p1">P1</span></td><td>Data-leakage check (run by Pilot Lead): confirm Snyk Code only sends required code context (vendor doc + proxy logs).</td><td>Documented; feeds the XC-02 governance checklist.</td></tr>
 </table>
+<div class="card">
+  <h4>TP / FP / Unsure labeling rubric (used in CLI-21 and questionnaire Q7–Q9)</h4>
+  <ul>
+    <li><strong>TP (true positive):</strong> the flagged pattern can actually occur in our code — e.g., user input really reaches the SQL query without sanitization; the vulnerable dependency function is really called.</li>
+    <li><strong>FP (false positive):</strong> the flagged pattern cannot occur in our context — e.g., input is a constant/server-side config, the vulnerable code path is unreachable, the finding flags test/example code, or the recommended fix is already applied.</li>
+    <li><strong>Unsure:</strong> cannot decide within ~2 minutes. Record as Unsure — do not guess. Reviewed with the Pilot Lead; still unresolved → Snyk vendor ticket.</li>
+    <li>Rule of thumb: <em>if you would not change the code because of this finding, it is probably an FP — write down why.</em></li>
+  </ul>
+</div>
 
 <h3>6.4 Finding Triage Workflow (SCA + SAST)</h3>
-<p>Triage = the end-to-end loop a developer/champion performs on a finding: <strong>review → prioritize → decide (fix / ignore / escalate) → act → verify</strong>. Since Jira/SCM integrations are out of scope, assignment is manual and tracked via the weekly triage review and the Snyk UI audit trail.</p>
+<p>Triage = the end-to-end loop a developer performs on a finding: <strong>review → prioritize → decide (fix / ignore / escalate) → act → verify</strong>. Without a Security Champion, the <strong>Pilot Lead</strong> is the escalation point and runs the weekly review; vendor support is the final arbiter for disputes.</p>
 <table>
   <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
   <tr><td>TRI-01</td><td><span class="badge b-p0">P0</span></td><td><strong>Review &amp; prioritize:</strong> from CLI output and the Snyk UI (monitored projects), sort/filter findings by severity, Snyk Priority Score, exploit maturity, and fixability.</td><td>Developer can produce a prioritized work queue in ≤ 5 min; priority metadata (CVSS, exploit maturity, "fix available") is visible and sufficient to make a decision.</td></tr>
-  <tr><td>TRI-02</td><td><span class="badge b-p0">P0</span></td><td><strong>Triage decision loop:</strong> each participant takes ≥ 5 real findings on their repo and records a decision per finding: <em>Fix now</em> / <em>Ignore with reason + expiry</em> / <em>Escalate to Security Champion</em>.</td><td>Every decision is recorded and traceable; median time-to-triage per finding ≤ 5 min (self-timed, reported in weekly survey).</td></tr>
+  <tr><td>TRI-02</td><td><span class="badge b-p0">P0</span></td><td><strong>Triage decision loop:</strong> each participant takes ≥ 5 real findings on their repo and records a decision per finding: <em>Fix now</em> / <em>Ignore with reason + expiry</em> / <em>Escalate to Pilot Lead</em>.</td><td>Every decision is recorded; counts + total triage minutes reported in the questionnaire (Q12–Q15 → M-8, M-9).</td></tr>
   <tr><td>TRI-03</td><td><span class="badge b-p1">P1</span></td><td><strong>Ignore mechanics:</strong> suppress an accepted-risk finding via <code>snyk ignore</code> and/or a <code>.snyk</code> policy file (reason + expiry date); re-scan.</td><td>Finding suppressed on re-scan; ignore visible in Snyk UI with reason/expiry (audit trail); expired ignores reappear (spot-check by setting short expiry).</td></tr>
-  <tr><td>TRI-04</td><td><span class="badge b-p1">P1</span></td><td><strong>Fix &amp; verify loop:</strong> fix a triaged finding (upgrade dependency / change code), re-scan in CLI and IDE, then re-run <code>snyk monitor</code>.</td><td>Fixed finding clears in CLI, IDE, and web UI; no regression introduced; UI snapshot reflects the fix.</td></tr>
-  <tr><td>TRI-05</td><td><span class="badge b-p1">P1</span></td><td><strong>Escalation path:</strong> escalate a disputed finding (suspected FP or unclear severity) to the Security Champion; champion reviews and either confirms, reclassifies, or reports to Snyk support.</td><td>Escalation resolved within 3 business days; outcome documented in the issue log; vendor tickets filed where needed.</td></tr>
-  <tr><td>TRI-06</td><td><span class="badge b-p2">P2</span></td><td><strong>Weekly triage review (team-level):</strong> Champion + Pilot Lead run a 30-min weekly review of new Critical/High findings across monitored projects in the Snyk UI.</td><td>Burn-down of Critical/High findings is trackable week-over-week; ≥ 90% of new Critical/High findings have a documented triage decision by the next review.</td></tr>
+  <tr><td>TRI-04</td><td><span class="badge b-p1">P1</span></td><td><strong>Fix &amp; verify loop:</strong> fix a triaged finding (upgrade dependency / change code), re-scan in CLI and IDE, then re-run <code>snyk monitor</code>.</td><td>Fixed finding clears in CLI, IDE, and web UI; counts reported in the questionnaire (Q10–Q11 → M-7).</td></tr>
+  <tr><td>TRI-05</td><td><span class="badge b-p1">P1</span></td><td><strong>Escalation path (no Champion):</strong> escalate a disputed finding (Unsure label, or disagreement with severity) to the <strong>Pilot Lead</strong>; unresolved within 3 business days → Snyk vendor ticket.</td><td>Every escalation has an outcome recorded in the issue log within 3 business days; vendor ticket IDs tracked.</td></tr>
+  <tr><td>TRI-06</td><td><span class="badge b-p2">P2</span></td><td><strong>Weekly triage review (run by Pilot Lead):</strong> 30-min review of new Critical/High findings across monitored projects in the Snyk UI.</td><td>Burn-down of Critical/High findings trackable week-over-week; final coverage computed from questionnaire counts (Q13 ÷ Q12 → M-9).</td></tr>
   <tr><td>TRI-07</td><td><span class="badge b-p2">P2</span></td><td><strong>Triage UX pain points:</strong> collect feedback on what is missing without Jira/SCM integration (assignment, notifications, bulk actions).</td><td>Gap list produced as Phase 2 requirements input (e.g., Jira integration, bulk ignore, SLA policies).</td></tr>
 </table>
 
@@ -295,12 +306,21 @@
   <tr><th>ID</th><th>Pri</th><th>Test Case</th><th>Expected Result</th></tr>
   <tr><td>XC-01</td><td><span class="badge b-p0">P0</span></td><td><strong>Network compatibility matrix:</strong> run CLI-04/IDE-02 from office LAN, VPN, and (if allowed) remote — capturing any blocked endpoints.</td><td>All endpoints documented; final allowlist confirmed with network team.</td></tr>
   <tr><td>XC-02</td><td><span class="badge b-p0">P0</span></td><td><strong>Security &amp; data-governance review:</strong> what leaves the network (code snippets via deeproxy, dependency metadata, telemetry).</td><td>Security/privacy sign-off documented; policy-sensitive repos excluded if required.</td></tr>
-  <tr><td>XC-03</td><td><span class="badge b-p1">P1</span></td><td><strong>Documentation quality:</strong> a participant follows only the Snyk official docs + our setup guide to self-onboard.</td><td>≥ 80% complete setup unaided; doc gaps recorded.</td></tr>
+  <tr><td>XC-03</td><td><span class="badge b-p1">P1</span></td><td><strong>Documentation quality:</strong> a participant follows only the Snyk official docs + our setup guide to self-onboard.</td><td>≥ 80% complete setup unaided (questionnaire Q3); doc gaps recorded.</td></tr>
   <tr><td>XC-04</td><td><span class="badge b-p1">P1</span></td><td><strong>Org-level visibility:</strong> Pilot Lead views all monitored projects, filters by severity/tag in Snyk UI.</td><td>Reporting adequate for pilot metrics; gaps noted for Phase 2.</td></tr>
 </table>
 
-<h2 id="s9">9. Metrics — Test-Case-Linked Scorecard</h2>
-<p><strong>Design principle: every metric is produced by specific test cases, and every success criterion points back to case IDs.</strong> No abstract indices — each number is a count, a percentage, an average, or a duration that comes straight out of executing the cases above. All metrics are recorded in the companion scorecard workbook <code>snyk-pilot-scorecard.xlsx</code>, which computes PASS/FAIL automatically.</p>
+<h2 id="s9">9. Metrics — How the Questionnaire Produces Every Number</h2>
+<p><strong>The measurement model, in one sentence:</strong> testers execute the test cases during W1–W4, then each tester fills in <strong>one end-of-pilot questionnaire (Appendix A — 20 questions, all counts / Yes-No / 1–5 ratings)</strong>; the scorecard workbook turns those answers into every metric below and into the PASS/FAIL verdicts in Section 10. Nobody calculates anything by hand — each question maps to exactly one metric, and each metric maps to exactly one success criterion.</p>
+
+<h3>9.0 The Data Flow</h3>
+<table>
+  <tr><th>Channel</th><th>Who fills it</th><th>What is reported</th><th>Metrics produced automatically</th></tr>
+  <tr><td><strong>① End-of-pilot questionnaire</strong> (Appendix A, once, end of W4) → <code>Questionnaire</code> sheet, one row per tester</td><td>All 40 testers</td><td>20 answers: setup Y/N + minutes; scan counts; TP/FP/Unsure counts; fix counts; Critical/High counts; triage counts + minutes; unresolved network issue Y/N; three 1–5 ratings; keep-using Y/N</td><td class="lnk">M-1, M-2, M-3, M-6, M-7, M-8, M-9, M-13, F-1…F-5</td></tr>
+  <tr><td><strong>② Case tracker</strong> (CaseTracker sheet)</td><td>Pilot Lead (from testers' case results)</td><td>Per-case status: Pass / Fail / Blocked / N/A</td><td class="lnk">EX-1, EX-2 → SC-1</td></tr>
+  <tr><td><strong>③ Direct measurement</strong> (no questionnaire)</td><td>Pilot Lead</td><td>Seeded-repo run (CLI-11); CLI↔IDE diff count (IDE-12); stopwatch timings (CLI-30, IDE-20); open items in the issue log (XC-01)</td><td class="lnk">M-4, M-5, M-10a/b, M-11, M-12</td></tr>
+</table>
+<div class="callout ok"><strong>Worked example — the FP rate (M-6) straight from the questionnaire:</strong> Q7 asks "how many of your reviewed Snyk Code findings were True Positives", Q8 asks how many were False Positives, Q9 how many Unsure. Say the 40 questionnaires sum to ΣTP = 231, ΣFP = 58, ΣUnsure = 23. The workbook computes M-6 = 58 ÷ (231 + 58) = <strong>20.1%</strong> → PASS (target ≤ 30%) → SC-7 passes. The 23 Unsure findings are never guessed — they went to the Pilot Lead during the pilot and became vendor tickets if unresolved. Same pattern for every other metric: question counts in, formula out, verdict automatic.</div>
 
 <h3>9.1 Execution Metrics (counted from the case tracker)</h3>
 <table>
@@ -309,85 +329,87 @@
   <tr><td>EX-2</td><td>Overall case pass rate</td><td class="lnk">All cases</td><td>All cases Pass ÷ executed</td><td class="kpi">≥ 90%</td></tr>
 </table>
 
-<h3>9.2 Functional &amp; Quality Metrics (measured during case execution)</h3>
+<h3>9.2 Functional &amp; Quality Metrics</h3>
 <table>
-  <tr><th>ID</th><th>Metric</th><th>Linked Test Cases</th><th>How Measured</th><th>Target</th></tr>
-  <tr><td>M-1</td><td>Setup success rate</td><td class="lnk">CLI-01/02/03/04, IDE-01/02</td><td>% of 40 participants who complete install + auth + first scan</td><td class="kpi">≥ 90%</td></tr>
-  <tr><td>M-2</td><td>Median time-to-first-scan</td><td class="lnk">CLI-01–04</td><td>Minutes from starting install to first successful <code>snyk test</code></td><td class="kpi">≤ 30 min</td></tr>
-  <tr><td>M-3</td><td>Scan success rate</td><td class="lnk">CLI-10/20/22, IDE-10/11</td><td>Successful scans ÷ total attempted (logs + weekly survey)</td><td class="kpi">≥ 95%</td></tr>
-  <tr><td>M-4</td><td>Seeded-vulnerability detection</td><td class="lnk">CLI-11</td><td>Seeded Critical/High vulnerabilities found ÷ total seeded</td><td class="kpi">100%</td></tr>
-  <tr><td>M-5</td><td>CLI ↔ IDE result consistency</td><td class="lnk">IDE-12</td><td>Unexplained discrepancies in Critical/High findings on same commit</td><td class="kpi">0</td></tr>
-  <tr><td>M-6</td><td>Snyk Code false-positive rate</td><td class="lnk">CLI-21</td><td>Champion-reviewed FP ÷ total reviewed (top 20 findings)</td><td class="kpi">≤ 30%</td></tr>
-  <tr><td>M-7</td><td>Fix-and-verify pass rate</td><td class="lnk">TRI-04, IDE-13</td><td>Fixed findings that clear on re-scan ÷ fixed findings attempted</td><td class="kpi">≥ 95%</td></tr>
-  <tr><td>M-8</td><td>Median time-to-triage per finding</td><td class="lnk">TRI-02</td><td>Self-timed decision time, reported weekly</td><td class="kpi">≤ 5 min</td></tr>
-  <tr><td>M-9</td><td>Triage decision coverage (Critical/High)</td><td class="lnk">TRI-06</td><td>% of new Critical/High with documented decision by next weekly review</td><td class="kpi">≥ 90%</td></tr>
-  <tr><td>M-10</td><td>Scan time, largest repo</td><td class="lnk">CLI-30</td><td>Stopwatch on largest internal repo</td><td class="kpi">SCA &lt; 3 min / SAST &lt; 5 min</td></tr>
-  <tr><td>M-11</td><td>IDE startup impact</td><td class="lnk">IDE-20</td><td>Startup time with plugin vs. without</td><td class="kpi">&lt; 10% slower</td></tr>
-  <tr><td>M-12</td><td>Open network blockers after W1</td><td class="lnk">XC-01</td><td>Unresolved proxy/firewall/CA issues in the issue log</td><td class="kpi">0</td></tr>
+  <tr><th>ID</th><th>Metric</th><th>Linked Test Cases</th><th>Formula (over questionnaire answers / direct input)</th><th>Target</th></tr>
+  <tr><td>M-1</td><td>Setup success rate</td><td class="lnk">CLI-01/02/03/04, IDE-01/02</td><td><strong>Q1:</strong> testers answering "setup complete = Y" ÷ 40</td><td class="kpi">≥ 90%</td></tr>
+  <tr><td>M-2</td><td>Median time-to-first-scan</td><td class="lnk">CLI-01–04</td><td><strong>Q2:</strong> median of "minutes from install to first successful scan"</td><td class="kpi">≤ 30 min</td></tr>
+  <tr><td>M-3</td><td>Scan success rate</td><td class="lnk">CLI-10/20/22, IDE-10/11</td><td><strong>Q4+Q5:</strong> 1 − (Σ scans failed ÷ Σ scans run)</td><td class="kpi">≥ 95%</td></tr>
+  <tr><td>M-4</td><td>Seeded-vulnerability detection</td><td class="lnk">CLI-11</td><td>Pilot Lead direct: seeded Critical/High found ÷ total seeded (objective anchor — no self-reporting)</td><td class="kpi">100%</td></tr>
+  <tr><td>M-5</td><td>CLI ↔ IDE result consistency</td><td class="lnk">IDE-12</td><td>Pilot Lead direct: unexplained Critical/High discrepancies on same commit</td><td class="kpi">0</td></tr>
+  <tr><td>M-6</td><td>Snyk Code false-positive rate (self-labeled)</td><td class="lnk">CLI-21</td><td><strong>Q7+Q8:</strong> ΣFP ÷ (ΣTP + ΣFP); Unsure (Q9) excluded &amp; routed to Pilot Lead → vendor</td><td class="kpi">≤ 30%</td></tr>
+  <tr><td>M-7</td><td>Fix-and-verify pass rate</td><td class="lnk">TRI-04, IDE-13</td><td><strong>Q10+Q11:</strong> Σ fixes cleared on re-scan ÷ Σ fixes attempted</td><td class="kpi">≥ 95%</td></tr>
+  <tr><td>M-8</td><td>Average time-to-triage per finding</td><td class="lnk">TRI-02</td><td><strong>Q14+Q15:</strong> Σ triage minutes ÷ Σ findings triaged</td><td class="kpi">≤ 5 min</td></tr>
+  <tr><td>M-9</td><td>Triage decision coverage (Critical/High)</td><td class="lnk">TRI-06</td><td><strong>Q12+Q13:</strong> Σ new C/H with documented decision ÷ Σ new C/H</td><td class="kpi">≥ 90%</td></tr>
+  <tr><td>M-10a/b</td><td>Scan time, largest repo</td><td class="lnk">CLI-30</td><td>Pilot Lead stopwatch: SCA minutes / SAST minutes</td><td class="kpi">&lt; 3 min / &lt; 5 min</td></tr>
+  <tr><td>M-11</td><td>IDE startup impact</td><td class="lnk">IDE-20</td><td>IDE-group direct: (startup with plugin − without) ÷ without</td><td class="kpi">&lt; 10% slower</td></tr>
+  <tr><td>M-12</td><td>Open network blockers after W1</td><td class="lnk">XC-01</td><td>Pilot Lead direct: unresolved proxy/firewall/CA items in the issue log</td><td class="kpi">0</td></tr>
+  <tr><td>M-13</td><td>Testers with unresolved network issues</td><td class="lnk">XC-01, CLI-04, IDE-02</td><td><strong>Q16:</strong> count of testers answering "unresolved network issue = Y"</td><td class="kpi">0</td></tr>
 </table>
 
-<h3>9.3 Participant Feedback Metrics (5-question W4 mini-survey — Appendix B)</h3>
-<p>Feedback is deliberately minimal — five direct questions, each tied to the cases it reflects. Ratings are simple averages; Yes/No is % Yes.</p>
+<h3>9.3 Participant Feedback Metrics (questionnaire Q17–Q20)</h3>
 <table>
   <tr><th>ID</th><th>Metric</th><th>Question</th><th>Linked Test Cases</th><th>Target</th></tr>
-  <tr><td>F-1</td><td>CLI overall rating (1–5 avg)</td><td>Q1: "Rate your overall experience with the Snyk CLI"</td><td class="lnk">CLI suite (6.1–6.5)</td><td class="kpi">≥ 4.0</td></tr>
-  <tr><td>F-2</td><td>IDE overall rating (1–5 avg)</td><td>Q2: "Rate your overall experience with the Snyk IDE plugin"</td><td class="lnk">IDE suite (7.1–7.4)</td><td class="kpi">≥ 4.0</td></tr>
-  <tr><td>F-3</td><td>Findings actionable (1–5 avg)</td><td>Q3: "Rate how clear &amp; actionable the findings are"</td><td class="lnk">CLI-21, TRI-01</td><td class="kpi">≥ 4.0</td></tr>
-  <tr><td>F-4</td><td>Continued-use intent (% Yes)</td><td>Q4: "Would you keep using Snyk after the pilot?"</td><td class="lnk">All cases (adoption signal)</td><td class="kpi">≥ 70%</td></tr>
-  <tr><td>F-5</td><td>Self-serve setup (% Yes)</td><td>Q5: "Did you complete setup without asking for help?"</td><td class="lnk">XC-03, CLI-01, IDE-01</td><td class="kpi">≥ 80%</td></tr>
+  <tr><td>F-1</td><td>CLI overall rating (1–5 avg)</td><td><strong>Q17:</strong> "Rate your overall experience with the Snyk CLI"</td><td class="lnk">CLI suite (6.1–6.5)</td><td class="kpi">≥ 4.0</td></tr>
+  <tr><td>F-2</td><td>IDE overall rating (1–5 avg)</td><td><strong>Q18:</strong> "Rate your overall experience with the Snyk IDE plugin"</td><td class="lnk">IDE suite (7.1–7.4)</td><td class="kpi">≥ 4.0</td></tr>
+  <tr><td>F-3</td><td>Findings actionable (1–5 avg)</td><td><strong>Q19:</strong> "Rate how clear &amp; actionable the findings are"</td><td class="lnk">CLI-21, TRI-01</td><td class="kpi">≥ 4.0</td></tr>
+  <tr><td>F-4</td><td>Continued-use intent (% Yes)</td><td><strong>Q20:</strong> "Would you keep using Snyk after the pilot?"</td><td class="lnk">All cases (adoption signal)</td><td class="kpi">≥ 70%</td></tr>
+  <tr><td>F-5</td><td>Self-serve setup (% Yes)</td><td><strong>Q3:</strong> "Did you complete setup without asking for help?"</td><td class="lnk">XC-03, CLI-01, IDE-01</td><td class="kpi">≥ 80%</td></tr>
 </table>
 
-<h3>9.4 Collection Mechanisms</h3>
+<h3>9.4 Collection Mechanics</h3>
 <ul>
-  <li><strong>Case tracker</strong> (in <code>snyk-pilot-scorecard.xlsx</code>): every case gets a status (Pass / Fail / Blocked / N/A) + measured value + note; EX-1/EX-2 and the Section 10 verdicts compute automatically.</li>
-  <li><strong>Weekly 5-minute survey</strong> (W1–W4): scans run, failures, blockers, triage decisions, time-to-triage (feeds M-3, M-8).</li>
-  <li><strong>Issue log:</strong> every bug/blocker tagged by component (CLI/IDE/network/docs) and severity; escalations from TRI-05 tracked here (feeds M-12).</li>
-  <li><strong>Triage audit trail:</strong> ignore reasons/expiry in <code>.snyk</code> files and the Snyk UI; weekly Critical/High burn-down from the Org UI (feeds M-9).</li>
-  <li><strong>W4 mini-survey:</strong> 5 questions (Appendix B), entered into the scorecard workbook — averages and % Yes compute automatically (feeds F-1…F-5).</li>
+  <li><strong>Tally sheet during the pilot:</strong> at onboarding every tester gets a one-page tally sheet (scans run/failed, TP/FP/Unsure, fixes/cleared, new C/H + decided, triaged + minutes). Jotting a count takes seconds and makes the end-of-pilot questionnaire a copy-paste exercise instead of a memory test.</li>
+  <li><strong>Questionnaire at end of W4:</strong> 20 questions, ≤ 10 minutes, numbers / Y-N / 1–5 only. Pilot Lead collects answers (form or email) and types them into the <code>Questionnaire</code> sheet — one row per tester. All metrics and verdicts compute automatically.</li>
+  <li><strong>Spot-check:</strong> the Pilot Lead cross-checks 5 random testers' counts against the Snyk UI (monitored projects show scan and finding counts) and flags anomalies — keeps self-reported numbers honest without any expert review layer.</li>
+  <li><strong>Issue log (Pilot Lead):</strong> every bug/blocker tagged by component and severity; Unsure FP labels and TRI-05 escalations land here and convert to vendor tickets after 3 business days (feeds M-12).</li>
   <li><strong>W5 debriefs:</strong> 30-min interviews with 8–10 participants; qualitative context for any FAIL verdict.</li>
 </ul>
 
 <h2 id="s10">10. Success Criteria (Go/No-Go for Phase 2)</h2>
-<div class="callout ok"><strong>Overall rule:</strong> The pilot is <strong>SUCCESSFUL (GO)</strong> if <strong>all 4 P0 gates pass</strong> AND <strong>at least 5 of the 7 aggregate criteria meet their targets</strong>. A "conditional pass" applies if exactly one P0 gate fails with a clear vendor/config fix identified. Every criterion below lists the test cases that produce its evidence.</div>
+<div class="callout ok"><strong>Overall rule:</strong> The pilot is <strong>SUCCESSFUL (GO)</strong> if <strong>all 4 P0 gates pass</strong> AND <strong>at least 5 of the 7 aggregate criteria meet their targets</strong>. A "conditional pass" applies if exactly one P0 gate fails with a clear vendor/config fix identified. Every aggregate criterion below is a formula over questionnaire answers; every P0 gate is either the case tracker or a Pilot Lead direct measurement.</div>
 <table>
-  <tr><th>#</th><th>Criterion</th><th>Linked Test Cases</th><th>Threshold</th><th>Type</th></tr>
-  <tr><td>SC-1</td><td>P0 case pass rate (EX-1)</td><td class="lnk">CLI-01→04, CLI-10→12, CLI-20→21, TRI-01→02, IDE-01→02, IDE-10→12, XC-01→02</td><td class="kpi">100% Pass (no open blocker)</td><td><span class="badge b-p0">P0 gate</span></td></tr>
-  <tr><td>SC-2</td><td>Seeded-vulnerability detection (M-4)</td><td class="lnk">CLI-11</td><td class="kpi">100% of seeded Critical/High</td><td><span class="badge b-p0">P0 gate</span></td></tr>
-  <tr><td>SC-3</td><td>Open network blockers after W1 (M-12)</td><td class="lnk">XC-01, CLI-04, IDE-02</td><td class="kpi">0</td><td><span class="badge b-p0">P0 gate</span></td></tr>
+  <tr><th>#</th><th>Criterion</th><th>Evidence source</th><th>Threshold</th><th>Type</th></tr>
+  <tr><td>SC-1</td><td>P0 case pass rate (EX-1)</td><td class="lnk">Case tracker — CLI-01→04, CLI-10→12, CLI-20→21, TRI-01→02, IDE-01→02, IDE-10→12, XC-01→02</td><td class="kpi">100% Pass (no open blocker)</td><td><span class="badge b-p0">P0 gate</span></td></tr>
+  <tr><td>SC-2</td><td>Seeded-vulnerability detection (M-4)</td><td class="lnk">CLI-11, run by Pilot Lead</td><td class="kpi">100% of seeded Critical/High</td><td><span class="badge b-p0">P0 gate</span></td></tr>
+  <tr><td>SC-3</td><td>Open network blockers (M-12) + testers with unresolved network issues (M-13)</td><td class="lnk">XC-01 issue log + questionnaire Q16</td><td class="kpi">0 and 0</td><td><span class="badge b-p0">P0 gate</span></td></tr>
   <tr><td>SC-4</td><td>Security/data-governance sign-off</td><td class="lnk">XC-02, CLI-23</td><td class="kpi">Signed off</td><td><span class="badge b-p0">P0 gate</span></td></tr>
-  <tr><td>SC-5</td><td>Setup success rate (M-1)</td><td class="lnk">CLI-01→04, IDE-01→02</td><td class="kpi">≥ 90%</td><td>Aggregate</td></tr>
-  <tr><td>SC-6</td><td>Scan success rate (M-3)</td><td class="lnk">CLI-10, CLI-20, CLI-22, IDE-10, IDE-11</td><td class="kpi">≥ 95%</td><td>Aggregate</td></tr>
-  <tr><td>SC-7</td><td>Snyk Code false-positive rate (M-6)</td><td class="lnk">CLI-21</td><td class="kpi">≤ 30%</td><td>Aggregate</td></tr>
-  <tr><td>SC-8</td><td>Fix-and-verify pass rate (M-7)</td><td class="lnk">TRI-04, IDE-13</td><td class="kpi">≥ 95%</td><td>Aggregate</td></tr>
-  <tr><td>SC-9</td><td>Triage loop health (M-8 + M-9)</td><td class="lnk">TRI-02, TRI-06</td><td class="kpi">Median ≤ 5 min AND coverage ≥ 90%</td><td>Aggregate</td></tr>
-  <tr><td>SC-10</td><td>Overall ratings CLI &amp; IDE (F-1, F-2)</td><td class="lnk">CLI suite / IDE suite</td><td class="kpi">≥ 4.0 / 5 each</td><td>Aggregate</td></tr>
-  <tr><td>SC-11</td><td>Continued-use intent (F-4)</td><td class="lnk">All cases</td><td class="kpi">≥ 70% Yes</td><td>Aggregate</td></tr>
+  <tr><td>SC-5</td><td>Setup success rate (M-1)</td><td class="lnk">Questionnaire Q1 (CLI-01→04, IDE-01→02)</td><td class="kpi">≥ 90%</td><td>Aggregate</td></tr>
+  <tr><td>SC-6</td><td>Scan success rate (M-3)</td><td class="lnk">Questionnaire Q4+Q5 (CLI-10/20/22, IDE-10/11)</td><td class="kpi">≥ 95%</td><td>Aggregate</td></tr>
+  <tr><td>SC-7</td><td>Snyk Code false-positive rate (M-6) — <em>self-labeled by testers using the CLI-21 rubric</em></td><td class="lnk">Questionnaire Q7+Q8 (CLI-21)</td><td class="kpi">≤ 30%</td><td>Aggregate</td></tr>
+  <tr><td>SC-8</td><td>Fix-and-verify pass rate (M-7)</td><td class="lnk">Questionnaire Q10+Q11 (TRI-04, IDE-13)</td><td class="kpi">≥ 95%</td><td>Aggregate</td></tr>
+  <tr><td>SC-9</td><td>Triage loop health (M-8 + M-9)</td><td class="lnk">Questionnaire Q12–Q15 (TRI-02, TRI-06)</td><td class="kpi">Avg ≤ 5 min AND coverage ≥ 90%</td><td>Aggregate</td></tr>
+  <tr><td>SC-10</td><td>Overall ratings CLI &amp; IDE (F-1, F-2)</td><td class="lnk">Questionnaire Q17+Q18</td><td class="kpi">≥ 4.0 / 5 each</td><td>Aggregate</td></tr>
+  <tr><td>SC-11</td><td>Continued-use intent (F-4)</td><td class="lnk">Questionnaire Q20</td><td class="kpi">≥ 70% Yes</td><td>Aggregate</td></tr>
 </table>
-<p><strong>How to read failures (traceable by design):</strong> each failed criterion names its cases, so the pilot report can point at exactly what broke. Examples: SC-7 fail → finding quality problem, check CLI-21 FP list; SC-9 fail → triage loop problem, review TRI-02/TRI-06 notes; SC-5 fail → onboarding/docs problem, review CLI-01–04 blocker notes. P0-gate failures (detection, network, security sign-off) are vendor/architecture blockers and should trigger competitive re-evaluation before Phase 2 investment.</p>
+<p><strong>On the honesty of self-reported numbers:</strong> SC-7 relies on tester self-labeling, which is noisier than expert review. Three compensating controls keep it trustworthy: (1) the <strong>CLI-21 labeling rubric</strong> gives an objective decision rule for TP / FP / Unsure, and Unsure items are never silently dropped — they go to the Pilot Lead and then to the vendor; (2) the <strong>CLI-11 seeded repo</strong> (run by the Pilot Lead, ground truth known) acts as an objective anchor for detection quality, so a vendor quality problem cannot hide behind generous self-labeling — if Snyk misses seeded vulnerabilities, SC-2 fails regardless of what testers report; (3) the Pilot Lead <strong>spot-checks 5 random testers</strong> against Snyk UI counts. If SC-7 passes but W5 debriefs contradict it, the debrief evidence wins and SC-7 is treated as FAIL.</p>
+<p><strong>How to read failures (traceable by design):</strong> each failed criterion names its questions and cases, so the pilot report can point at exactly what broke. Examples: SC-7 fail → finding quality problem, review the Q8 (FP) answers and the Unsure items sent to the vendor; SC-9 fail → triage loop problem, review Q12–Q15 distributions and TRI-02/TRI-06 notes; SC-5 fail → onboarding/docs problem, review Q1–Q3 and the CLI-01–04 blocker notes. P0-gate failures (detection, network, security sign-off) are vendor/architecture blockers and should trigger competitive re-evaluation before Phase 2 investment.</p>
 
 <h2 id="s11">11. Risks &amp; Mitigations</h2>
 <table>
   <tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
+  <tr><td><strong>No Security Champion — FP/severity judgment less rigorous</strong>; self-labeled TP/FP may be wrong</td><td>High</td><td>Objective anchors replace expert review: CLI-21 labeling rubric with an explicit "Unsure" escape hatch (routed Pilot Lead → vendor ticket within 3 business days); CLI-11 seeded repo run by the Pilot Lead gives a ground-truth detection check (SC-2); W5 debriefs cross-validate SC-7 (contradiction ⇒ SC-7 treated as FAIL).</td></tr>
   <tr><td>Corporate proxy/CA blocks CLI or deeproxy traffic</td><td>High</td><td>Pre-pilot (W0) smoke test with network team; maintain documented allowlist; fallback: token-based auth + explicit proxy config.</td></tr>
   <tr><td>Internal registry (Nexus/Artifactory) breaks dependency resolution</td><td>High</td><td>Dedicated test case CLI-12 in W1; capture failing manifests early; engage Snyk support during pilot.</td></tr>
   <tr><td>Security team objects to code snippets leaving network (Snyk Code)</td><td>High</td><td>Run XC-02 review in W0/W1; if rejected, scope Phase 1 to SCA + IaC only and defer SAST decision.</td></tr>
+  <tr><td><strong>End-of-pilot recall error</strong> — testers forget counts when filling one questionnaire at the end</td><td>Medium</td><td>Tally sheet issued at W0 onboarding (jot counts as you go — seconds per scan); questionnaire accepts rough estimates ("approximately" is fine — rates, not exact counts, drive verdicts); Pilot Lead spot-checks 5 random testers against Snyk UI counts and flags anomalies.</td></tr>
   <tr><td>Broker cannot be deployed in the intranet short-term, blocking Phase 2 planning</td><td>Medium</td><td>Accept as a Phase 2 gating dependency; use Phase 1 network findings (XC-01) to pre-draft Broker architecture, host, and allowlist requirements so Phase 2 can start immediately once deployment is feasible.</td></tr>
-  <tr><td>Triage loop breaks down without Jira/SCM integration (decisions lost, no assignment)</td><td>Medium</td><td>Compensate with weekly champion-led triage review (TRI-06) + issue log; capture missing capabilities in TRI-07 as Phase 2 requirements.</td></tr>
-  <tr><td>Participant drop-off / survey fatigue</td><td>Medium</td><td>Keep weekly survey ≤ 5 min; W4 mini-survey ≤ 2 min; office-hours twice weekly; manager endorsement.</td></tr>
+  <tr><td>Triage loop breaks down without Jira/SCM integration (decisions lost, no assignment)</td><td>Medium</td><td>Compensate with the Pilot-Lead-hosted weekly triage review (TRI-06) + issue log; capture missing capabilities in TRI-07 as Phase 2 requirements.</td></tr>
+  <tr><td>Participant drop-off / low questionnaire response rate</td><td>Medium</td><td>Single questionnaire only (no weekly surveys), ≤ 10 min, numbers-only; manager endorsement; <strong>≥ 90% response rate is itself an exit criterion</strong> (Section 12.1) — a metric based on fewer than 36 of 40 answers is marked "insufficient data", not PASS.</td></tr>
   <tr><td>Plan limits (test counts) hit during heavy scanning</td><td>Medium</td><td>Confirm limits with vendor in W0; monitor usage in Org UI weekly.</td></tr>
-  <tr><td>Results skewed by unrepresentative repos</td><td>Medium</td><td>Repo selection reviewed by Security Champions; ensure ≥ 4 languages and legacy + modern codebases.</td></tr>
-  <tr><td>False-positive fatigue biases feedback negative</td><td>Low–Med</td><td>Teach ignore/severity-threshold workflows in onboarding; measure FP objectively via CLI-21 champion review, not only sentiment.</td></tr>
+  <tr><td>Results skewed by unrepresentative repos</td><td>Medium</td><td>Repo selection reviewed by Pilot Lead against a checklist (≥ 4 languages, legacy + modern codebases, ≥ 1 monorepo); vendor solution engineer invited to sanity-check the list in W0.</td></tr>
+  <tr><td>False-positive fatigue biases feedback negative</td><td>Low–Med</td><td>Teach ignore/severity-threshold workflows in onboarding; measure FP via rubric-based counts (M-6) and the seeded anchor (M-4), not only sentiment.</td></tr>
 </table>
 
 <h2 id="s12">12. Exit Criteria &amp; Next Phase</h2>
 <h3>12.1 Pilot Exit Criteria</h3>
 <ul>
   <li>All test cases executed with status recorded in the scorecard workbook; issue log triaged to zero untriaged items.</li>
-  <li>Scorecard finalized: all Section 9 metrics populated; Section 10 verdicts computed.</li>
+  <li><strong>Questionnaire response rate ≥ 90%</strong> (≥ 36 of 40 testers); all Section 9 metrics computed; Section 10 verdicts finalized in the workbook.</li>
   <li>Go/no-go recommendation presented to stakeholders with:</li>
   <ul>
-    <li>Success-criteria scorecard (Section 10) with case-level evidence,</li>
-    <li>Top issues &amp; vendor support experience,</li>
+    <li>Success-criteria scorecard (Section 10) with question-level evidence,</li>
+    <li>Top issues &amp; vendor support experience (incl. Unsure/escalation ticket outcomes),</li>
     <li>Triage-workflow gap list (TRI-07) — what Jira/SCM integration must provide in Phase 2,</li>
     <li>Phase 2 requirements (Broker architecture, endpoint allowlist delta, SCM/CI integration plan, estimated effort).</li>
   </ul>
@@ -402,44 +424,79 @@
   <li>Snyk Container and other Snyk capabilities remain out of scope and would require a separate evaluation if needed later.</li>
 </ul>
 
-<h2 id="app">Appendix A — Weekly Feedback Template</h2>
+<h2 id="app">Appendix A — End-of-Pilot Questionnaire (Scoring Instrument)</h2>
+<p><strong>Fill in once, at the end of W4. ≤ 10 minutes. All answers are numbers, Yes/No, or 1–5 ratings.</strong> Use your tally sheet — rough estimates are fine. Each question states which metric and success criterion it feeds; the scorecard workbook does all calculations. Send the completed questionnaire to the Pilot Lead.</p>
+
 <div class="card">
-  <h4>Pilot Participant Weekly Survey (≤ 5 min)</h4>
-  <ol>
-    <li>Which tools did you use this week? ☐ CLI ☐ VS Code plugin ☐ JetBrains plugin</li>
-    <li>How many scans did you run? (roughly) How many failed? → feeds M-3</li>
-    <li>Did any scan fail or behave unexpectedly? (describe + attach command/error)</li>
-    <li>Did you hit any network/proxy/certificate issues? → feeds M-12</li>
-    <li>Did Snyk find anything real &amp; useful? Did you fix anything? → feeds M-7</li>
-    <li>How many findings did you triage (fix / ignore / escalate)? Roughly how long per decision? → feeds M-8</li>
-    <li>Any finding you believe is a false positive? (link/screenshot) → feeds M-6</li>
-    <li>Anything blocking you next week?</li>
-  </ol>
+  <h4>Part 1 — Setup (from your W1 notes)</h4>
+  <table>
+    <tr><th style="width:5%">#</th><th>Question</th><th style="width:10%">Format</th><th style="width:24%">Feeds</th></tr>
+    <tr><td>Q1</td><td>Did you complete setup (install + authenticate + first successful scan)?</td><td>Y / N</td><td class="lnk">M-1 → SC-5</td></tr>
+    <tr><td>Q2</td><td>How many minutes from starting the install to your first successful scan?</td><td>number</td><td class="lnk">M-2</td></tr>
+    <tr><td>Q3</td><td>Did you complete setup without asking anyone for help?</td><td>Y / N</td><td class="lnk">F-5 (XC-03)</td></tr>
+  </table>
+</div>
+<div class="card">
+  <h4>Part 2 — Scanning (whole pilot)</h4>
+  <table>
+    <tr><th style="width:5%">#</th><th>Question</th><th style="width:10%">Format</th><th style="width:24%">Feeds</th></tr>
+    <tr><td>Q4</td><td>How many scans did you run in total (CLI + IDE, roughly)?</td><td>number</td><td class="lnk">M-3 (denominator)</td></tr>
+    <tr><td>Q5</td><td>How many of those scans failed or errored out?</td><td>number</td><td class="lnk">M-3 → SC-6</td></tr>
+  </table>
+</div>
+<div class="card">
+  <h4>Part 3 — Finding quality (use the CLI-21 rubric)</h4>
+  <table>
+    <tr><th style="width:5%">#</th><th>Question</th><th style="width:10%">Format</th><th style="width:24%">Feeds</th></tr>
+    <tr><td>Q6</td><td>How many findings did you review in total (any severity, any product)?</td><td>number</td><td>context / consistency check</td></tr>
+    <tr><td>Q7</td><td>Of the findings you reviewed, how many were <strong>True Positives</strong>? (real issue you would act on)</td><td>number</td><td class="lnk">M-6 → SC-7</td></tr>
+    <tr><td>Q8</td><td>Of the findings you reviewed, how many were <strong>False Positives</strong>? (tool is wrong or not applicable in our context)</td><td>number</td><td class="lnk">M-6 → SC-7</td></tr>
+    <tr><td>Q9</td><td>How many were <strong>Unsure</strong>? (should already be reported to the Pilot Lead — unresolved ones go to the vendor)</td><td>number</td><td>tracking only (excluded from M-6)</td></tr>
+  </table>
+</div>
+<div class="card">
+  <h4>Part 4 — Fix &amp; triage (whole pilot)</h4>
+  <table>
+    <tr><th style="width:5%">#</th><th>Question</th><th style="width:10%">Format</th><th style="width:24%">Feeds</th></tr>
+    <tr><td>Q10</td><td>How many findings did you fix (code change or dependency upgrade)?</td><td>number</td><td class="lnk">M-7 (denominator)</td></tr>
+    <tr><td>Q11</td><td>Of those, how many were confirmed cleared when you re-scanned?</td><td>number</td><td class="lnk">M-7 → SC-8</td></tr>
+    <tr><td>Q12</td><td>How many <strong>new Critical/High</strong> findings appeared on your projects during the pilot?</td><td>number</td><td class="lnk">M-9 (denominator)</td></tr>
+    <tr><td>Q13</td><td>Of those, how many have a documented decision (fix / ignore with reason + expiry / escalate)?</td><td>number</td><td class="lnk">M-9 → SC-9</td></tr>
+    <tr><td>Q14</td><td>How many findings did you triage in total (made a fix / ignore / escalate decision)?</td><td>number</td><td class="lnk">M-8 (denominator)</td></tr>
+    <tr><td>Q15</td><td>Roughly how many minutes did triage take you in total?</td><td>number</td><td class="lnk">M-8 → SC-9</td></tr>
+    <tr><td>Q16</td><td>Do you have any network / proxy / certificate issue that is <strong>still unresolved</strong> today?</td><td>Y / N</td><td class="lnk">M-13 → SC-3</td></tr>
+  </table>
+</div>
+<div class="card">
+  <h4>Part 5 — Overall (ratings &amp; intent)</h4>
+  <table>
+    <tr><th style="width:5%">#</th><th>Question</th><th style="width:10%">Format</th><th style="width:24%">Feeds</th></tr>
+    <tr><td>Q17</td><td>Rate your overall experience with the <strong>Snyk CLI</strong>. (skip if you never used the CLI)</td><td>1–5</td><td class="lnk">F-1 → SC-10</td></tr>
+    <tr><td>Q18</td><td>Rate your overall experience with the <strong>Snyk IDE plugin</strong>. (skip if you never used the plugin)</td><td>1–5</td><td class="lnk">F-2 → SC-10</td></tr>
+    <tr><td>Q19</td><td>Rate how <strong>clear &amp; actionable</strong> the findings are.</td><td>1–5</td><td class="lnk">F-3</td></tr>
+    <tr><td>Q20</td><td>Would you <strong>keep using Snyk</strong> after the pilot?</td><td>Y / N</td><td class="lnk">F-4 → SC-11</td></tr>
+    <tr><td>—</td><td>Optional free text: biggest pain point? (used in W5 debriefs, not scored)</td><td>text</td><td>qualitative</td></tr>
+  </table>
 </div>
 
-<h2 id="appb">Appendix B — W4 Mini-Survey &amp; Scoring</h2>
-<p>Five direct questions, two answer formats, two computations. Each question maps to the test cases it reflects, so a low score points at a concrete part of the pilot.</p>
-
-<h3>B.1 The 5 Questions</h3>
-<table>
-  <tr><th>#</th><th>Question</th><th>Format</th><th>Metric</th><th>Linked Cases</th><th>Target</th></tr>
-  <tr><td>Q1</td><td>Rate your overall experience with the <strong>Snyk CLI</strong>.</td><td>1–5</td><td>F-1</td><td class="lnk">CLI suite</td><td class="kpi">avg ≥ 4.0</td></tr>
-  <tr><td>Q2</td><td>Rate your overall experience with the <strong>Snyk IDE plugin</strong>.</td><td>1–5</td><td>F-2</td><td class="lnk">IDE suite</td><td class="kpi">avg ≥ 4.0</td></tr>
-  <tr><td>Q3</td><td>Rate how <strong>clear &amp; actionable</strong> the findings are.</td><td>1–5</td><td>F-3</td><td class="lnk">CLI-21, TRI-01</td><td class="kpi">avg ≥ 4.0</td></tr>
-  <tr><td>Q4</td><td>Would you <strong>keep using Snyk</strong> after the pilot?</td><td>Y/N</td><td>F-4</td><td class="lnk">All</td><td class="kpi">≥ 70% Yes</td></tr>
-  <tr><td>Q5</td><td>Did you <strong>complete setup without asking for help</strong>?</td><td>Y/N</td><td>F-5</td><td class="lnk">XC-03, CLI-01, IDE-01</td><td class="kpi">≥ 80% Yes</td></tr>
-</table>
-<p>Participants who only used one surface answer only Q1 or Q2; blanks are excluded from averages. Optional free-text: "Biggest pain point?" — used in W5 debriefs.</p>
-
-<h3>B.2 Scoring</h3>
+<h3>A.1 How the Score Is Computed (no manual math — the workbook does this)</h3>
 <div class="formula">
-Rating (F-1/F-2/F-3)  = (sum of 1–5 answers) ÷ (number of answers)     → target ≥ 4.0<br>
-Yes/No (F-4/F-5)      = (count of "Yes") ÷ (number of answers) × 100%  → target per metric
+M-1  = COUNT(Q1 = Y) ÷ 40                        → SC-5   (target ≥ 90%)<br>
+M-2  = MEDIAN(Q2)                                → info   (target ≤ 30 min)<br>
+M-3  = 1 − ΣQ5 ÷ ΣQ4                             → SC-6   (target ≥ 95%)<br>
+M-6  = ΣQ8 ÷ (ΣQ7 + ΣQ8)                         → SC-7   (target ≤ 30%)<br>
+M-7  = ΣQ11 ÷ ΣQ10                               → SC-8   (target ≥ 95%)<br>
+M-8  = ΣQ15 ÷ ΣQ14                               → SC-9   (target ≤ 5 min, with M-9)<br>
+M-9  = ΣQ13 ÷ ΣQ12                               → SC-9   (target ≥ 90%, with M-8)<br>
+M-13 = COUNT(Q16 = Y)                            → SC-3   (target 0, with M-12)<br>
+F-1/F-2/F-3 = AVERAGE(Q17 / Q18 / Q19)           → SC-10  (target ≥ 4.0)<br>
+F-4  = COUNT(Q20 = Y) ÷ respondents              → SC-11  (target ≥ 70%)<br>
+F-5  = COUNT(Q3 = Y) ÷ respondents               → info   (target ≥ 80%)
 </div>
-<p><strong>Worked example:</strong> 38 of 40 participants respond. Q1 answers sum to 160 → F-1 = 160 ÷ 38 = <strong>4.2</strong> → PASS (≥ 4.0). Q4: 29 Yes of 38 → F-4 = <strong>76%</strong> → PASS (≥ 70%). Both feed Section 10 verdicts directly (SC-10, SC-11).</p>
+<p><strong>Final verdict:</strong> GO = all 4 P0 gates pass (case tracker, seeded repo, network, security sign-off) AND at least 5 of the 7 aggregate criteria above pass. The Dashboard sheet of <code>snyk-pilot-scorecard-v3.xlsx</code> shows the verdict automatically once the questionnaire rows are entered.</p>
 
 <footer>
-  Snyk Internal Pilot Testing Plan — Phase 1 (CLI &amp; IDE, pre-Broker; SAST + SCA + IaC only). v1.4, updated 2026-08-07. Internal use only.
+  Snyk Internal Pilot Testing Plan — Phase 1 (CLI &amp; IDE, pre-Broker; SAST + SCA + IaC only; no Security Champion; success criteria computed from one end-of-pilot questionnaire). v1.7, updated 2026-08-07. Internal use only.
 </footer>
 
 </div>
