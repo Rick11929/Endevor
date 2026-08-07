@@ -49,6 +49,7 @@
   .toc li{margin:4px 0}
   footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
   .kpi{font-weight:700;color:var(--green)}
+  .lnk{color:var(--accent);font-weight:600;white-space:nowrap}
   @media(max-width:820px){.grid2{grid-template-columns:1fr}.toc{column-count:1}.page{padding:32px 16px 64px}}
 </style>
 </head>
@@ -59,7 +60,7 @@
   <h1>Snyk Internal Pilot Testing Plan</h1>
   <div class="sub">Phase 1 — CLI &amp; IDE Testing (Pre-Broker) · SAST + SCA + IaC Only</div>
   <div class="meta">
-    <span>Version: 1.2</span>
+    <span>Version: 1.4</span>
     <span>Date: 2026-08-07</span>
     <span>Pilot Size: ~40 Developers</span>
     <span>Scope: SAST (Snyk Code) + SCA (Open Source) + IaC, via CLI + IDE</span>
@@ -77,12 +78,12 @@
   <li><a href="#s6">6. Test Cases — CLI</a></li>
   <li><a href="#s7">7. Test Cases — IDE</a></li>
   <li><a href="#s8">8. Cross-Cutting / Non-Functional Cases</a></li>
-  <li><a href="#s9">9. Metrics &amp; Data Collection</a></li>
+  <li><a href="#s9">9. Metrics — Test-Case-Linked Scorecard</a></li>
   <li><a href="#s10">10. Success Criteria</a></li>
   <li><a href="#s11">11. Risks &amp; Mitigations</a></li>
   <li><a href="#s12">12. Exit Criteria &amp; Next Phase</a></li>
-  <li><a href="#app">Appendix A — Feedback Template</a></li>
-  <li><a href="#appb">Appendix B — NPS &amp; SUS Explained</a></li>
+  <li><a href="#app">Appendix A — Weekly Feedback Template</a></li>
+  <li><a href="#appb">Appendix B — W4 Mini-Survey &amp; Scoring</a></li>
 </ol>
 
 <h2 id="s1">1. Background &amp; Objectives</h2>
@@ -191,13 +192,13 @@
   <tr><th>Week</th><th>Phase</th><th>Activities</th></tr>
   <tr><td>W0</td><td>Preparation</td><td>Finalize allowlist &amp; accounts; publish setup guide; participant onboarding session (45 min, incl. triage workflow demo); distribute API tokens; smoke-test with Pilot Lead + Champions only.</td></tr>
   <tr><td>W1</td><td>Setup &amp; Baseline</td><td>All 40 participants install CLI and/or IDE plugin, authenticate, run first <code>snyk test</code>. Record time-to-first-scan per participant. Baseline vulnerability counts per repo.</td></tr>
-  <tr><td>W2–W3</td><td>Core Testing</td><td>Execute assigned test-case matrix (Sections 6–8), including finding triage workflow (TRI-xx). Weekly feedback survey #1 and #2; weekly 30-min triage review with Champions. Office-hours twice a week.</td></tr>
-  <tr><td>W4</td><td>Real-World Usage</td><td>Free-form usage on daily work: triage and fix at least one finding per developer (where available), use ignore workflows, re-scan. Survey #3 + SUS/NPS questionnaire (see Appendix B).</td></tr>
-  <tr><td>W5</td><td>Wrap-Up</td><td>Debrief interviews (8–10 participants), aggregate metrics, write pilot report, go/no-go recommendation for Phase 2 (Broker + SCM/CI integration).</td></tr>
+  <tr><td>W2–W3</td><td>Core Testing</td><td>Execute assigned test-case matrix (Sections 6–8), including finding triage workflow (TRI-xx); record every case result in the scorecard workbook (<code>snyk-pilot-scorecard.xlsx</code>). Weekly feedback survey #1 and #2; weekly 30-min triage review with Champions. Office-hours twice a week.</td></tr>
+  <tr><td>W4</td><td>Real-World Usage</td><td>Free-form usage on daily work: triage and fix at least one finding per developer (where available), use ignore workflows, re-scan. Survey #3 + W4 mini-survey (5 questions, Appendix B).</td></tr>
+  <tr><td>W5</td><td>Wrap-Up</td><td>Debrief interviews (8–10 participants), finalize scorecard workbook, write pilot report, go/no-go recommendation for Phase 2 (Broker + SCM/CI integration).</td></tr>
 </table>
 
 <h2 id="s6">6. Test Cases — Snyk CLI</h2>
-<p>Each case lists ID, objective, steps summary, and expected result. Priority: <span class="badge b-p0">P0</span> must-pass, <span class="badge b-p1">P1</span> should-pass, <span class="badge b-p2">P2</span> nice-to-have.</p>
+<p>Each case lists ID, objective, steps summary, and expected result. Priority: <span class="badge b-p0">P0</span> must-pass, <span class="badge b-p1">P1</span> should-pass, <span class="badge b-p2">P2</span> nice-to-have. Every metric in Section 9 and every success criterion in Section 10 references these case IDs directly.</p>
 
 <h3>6.1 Installation &amp; Authentication</h3>
 <table>
@@ -298,55 +299,71 @@
   <tr><td>XC-04</td><td><span class="badge b-p1">P1</span></td><td><strong>Org-level visibility:</strong> Pilot Lead views all monitored projects, filters by severity/tag in Snyk UI.</td><td>Reporting adequate for pilot metrics; gaps noted for Phase 2.</td></tr>
 </table>
 
-<h2 id="s9">9. Metrics &amp; Data Collection</h2>
-<h3>9.1 Quantitative Metrics</h3>
+<h2 id="s9">9. Metrics — Test-Case-Linked Scorecard</h2>
+<p><strong>Design principle: every metric is produced by specific test cases, and every success criterion points back to case IDs.</strong> No abstract indices — each number is a count, a percentage, an average, or a duration that comes straight out of executing the cases above. All metrics are recorded in the companion scorecard workbook <code>snyk-pilot-scorecard.xlsx</code>, which computes PASS/FAIL automatically.</p>
+
+<h3>9.1 Execution Metrics (counted from the case tracker)</h3>
 <table>
-  <tr><th>Metric</th><th>How Measured</th><th>Target</th></tr>
-  <tr><td>Setup success rate</td><td>% of 40 participants who complete install + auth + first scan</td><td class="kpi">≥ 90%</td></tr>
-  <tr><td>Median time-to-first-scan</td><td>Self-reported + onboarding observation</td><td class="kpi">≤ 30 min</td></tr>
-  <tr><td>Scan success rate</td><td>Successful scans / total attempted (per logs &amp; weekly survey)</td><td class="kpi">≥ 95%</td></tr>
-  <tr><td>Detection accuracy</td><td>Seeded known vulnerabilities found / total seeded</td><td class="kpi">100% of Critical/High</td></tr>
-  <tr><td>Snyk Code false-positive rate</td><td>Champion-reviewed findings flagged as FP / total reviewed</td><td class="kpi">≤ 30%</td></tr>
-  <tr><td>Findings fixed during pilot</td><td>% of participants who fixed ≥ 1 real finding</td><td class="kpi">≥ 60%</td></tr>
-  <tr><td>Median time-to-triage per finding</td><td>Self-timed during TRI-02; reported in weekly survey</td><td class="kpi">≤ 5 min</td></tr>
-  <tr><td>Triage decision coverage</td><td>% of new Critical/High findings with a documented decision (fix / ignore / escalate) by the next weekly review</td><td class="kpi">≥ 90%</td></tr>
-  <tr><td>CLI scan performance</td><td>Measured on largest repo (CLI-30)</td><td class="kpi">Within targets of CLI-30</td></tr>
-  <tr><td>Blocking network issues</td><td># of unresolved proxy/firewall blockers after W1</td><td class="kpi">0</td></tr>
+  <tr><th>ID</th><th>Metric</th><th>Linked Test Cases</th><th>How Measured</th><th>Target</th></tr>
+  <tr><td>EX-1</td><td>P0 case pass rate</td><td class="lnk">All <span class="badge b-p0">P0</span> cases</td><td>P0 cases with status Pass ÷ P0 cases executed (Pass/Fail/Blocked)</td><td class="kpi">100%</td></tr>
+  <tr><td>EX-2</td><td>Overall case pass rate</td><td class="lnk">All cases</td><td>All cases Pass ÷ executed</td><td class="kpi">≥ 90%</td></tr>
 </table>
-<h3>9.2 Qualitative Metrics</h3>
+
+<h3>9.2 Functional &amp; Quality Metrics (measured during case execution)</h3>
 <table>
-  <tr><th>Metric</th><th>Instrument</th><th>Target</th></tr>
-  <tr><td>System Usability Scale (SUS) — see Appendix B</td><td>W4 survey (CLI and IDE scored separately)</td><td class="kpi">≥ 68 (above-average usability)</td></tr>
-  <tr><td>Net Promoter Score (NPS) — see Appendix B</td><td>W4 survey ("recommend Snyk to a colleague?", 0–10)</td><td class="kpi">≥ 20</td></tr>
-  <tr><td>Continued-use intent</td><td>% answering "would keep using after pilot"</td><td class="kpi">≥ 70%</td></tr>
-  <tr><td>Perceived noise level</td><td>% rating findings "mostly actionable"</td><td class="kpi">≥ 60%</td></tr>
+  <tr><th>ID</th><th>Metric</th><th>Linked Test Cases</th><th>How Measured</th><th>Target</th></tr>
+  <tr><td>M-1</td><td>Setup success rate</td><td class="lnk">CLI-01/02/03/04, IDE-01/02</td><td>% of 40 participants who complete install + auth + first scan</td><td class="kpi">≥ 90%</td></tr>
+  <tr><td>M-2</td><td>Median time-to-first-scan</td><td class="lnk">CLI-01–04</td><td>Minutes from starting install to first successful <code>snyk test</code></td><td class="kpi">≤ 30 min</td></tr>
+  <tr><td>M-3</td><td>Scan success rate</td><td class="lnk">CLI-10/20/22, IDE-10/11</td><td>Successful scans ÷ total attempted (logs + weekly survey)</td><td class="kpi">≥ 95%</td></tr>
+  <tr><td>M-4</td><td>Seeded-vulnerability detection</td><td class="lnk">CLI-11</td><td>Seeded Critical/High vulnerabilities found ÷ total seeded</td><td class="kpi">100%</td></tr>
+  <tr><td>M-5</td><td>CLI ↔ IDE result consistency</td><td class="lnk">IDE-12</td><td>Unexplained discrepancies in Critical/High findings on same commit</td><td class="kpi">0</td></tr>
+  <tr><td>M-6</td><td>Snyk Code false-positive rate</td><td class="lnk">CLI-21</td><td>Champion-reviewed FP ÷ total reviewed (top 20 findings)</td><td class="kpi">≤ 30%</td></tr>
+  <tr><td>M-7</td><td>Fix-and-verify pass rate</td><td class="lnk">TRI-04, IDE-13</td><td>Fixed findings that clear on re-scan ÷ fixed findings attempted</td><td class="kpi">≥ 95%</td></tr>
+  <tr><td>M-8</td><td>Median time-to-triage per finding</td><td class="lnk">TRI-02</td><td>Self-timed decision time, reported weekly</td><td class="kpi">≤ 5 min</td></tr>
+  <tr><td>M-9</td><td>Triage decision coverage (Critical/High)</td><td class="lnk">TRI-06</td><td>% of new Critical/High with documented decision by next weekly review</td><td class="kpi">≥ 90%</td></tr>
+  <tr><td>M-10</td><td>Scan time, largest repo</td><td class="lnk">CLI-30</td><td>Stopwatch on largest internal repo</td><td class="kpi">SCA &lt; 3 min / SAST &lt; 5 min</td></tr>
+  <tr><td>M-11</td><td>IDE startup impact</td><td class="lnk">IDE-20</td><td>Startup time with plugin vs. without</td><td class="kpi">&lt; 10% slower</td></tr>
+  <tr><td>M-12</td><td>Open network blockers after W1</td><td class="lnk">XC-01</td><td>Unresolved proxy/firewall/CA issues in the issue log</td><td class="kpi">0</td></tr>
 </table>
-<h3>9.3 Collection Mechanisms</h3>
+
+<h3>9.3 Participant Feedback Metrics (5-question W4 mini-survey — Appendix B)</h3>
+<p>Feedback is deliberately minimal — five direct questions, each tied to the cases it reflects. Ratings are simple averages; Yes/No is % Yes.</p>
+<table>
+  <tr><th>ID</th><th>Metric</th><th>Question</th><th>Linked Test Cases</th><th>Target</th></tr>
+  <tr><td>F-1</td><td>CLI overall rating (1–5 avg)</td><td>Q1: "Rate your overall experience with the Snyk CLI"</td><td class="lnk">CLI suite (6.1–6.5)</td><td class="kpi">≥ 4.0</td></tr>
+  <tr><td>F-2</td><td>IDE overall rating (1–5 avg)</td><td>Q2: "Rate your overall experience with the Snyk IDE plugin"</td><td class="lnk">IDE suite (7.1–7.4)</td><td class="kpi">≥ 4.0</td></tr>
+  <tr><td>F-3</td><td>Findings actionable (1–5 avg)</td><td>Q3: "Rate how clear &amp; actionable the findings are"</td><td class="lnk">CLI-21, TRI-01</td><td class="kpi">≥ 4.0</td></tr>
+  <tr><td>F-4</td><td>Continued-use intent (% Yes)</td><td>Q4: "Would you keep using Snyk after the pilot?"</td><td class="lnk">All cases (adoption signal)</td><td class="kpi">≥ 70%</td></tr>
+  <tr><td>F-5</td><td>Self-serve setup (% Yes)</td><td>Q5: "Did you complete setup without asking for help?"</td><td class="lnk">XC-03, CLI-01, IDE-01</td><td class="kpi">≥ 80%</td></tr>
+</table>
+
+<h3>9.4 Collection Mechanisms</h3>
 <ul>
-  <li>Weekly 5-minute survey (W1–W4): scans run, failures, blockers, notable findings, triage decisions made, time-to-triage.</li>
-  <li>Issue log (shared tracker): every bug/blocker tagged by component (CLI/IDE/network/docs) and severity; escalations from TRI-05 tracked here.</li>
-  <li>Triage audit trail: ignore reasons/expiry in <code>.snyk</code> files and the Snyk UI; weekly Critical/High burn-down captured from the Org UI.</li>
-  <li>Auto-collected: Snyk Org UI reports (projects monitored, issue counts by severity, fix activity).</li>
-  <li>W4: SUS (10-item questionnaire) + NPS (single 0–10 question), per Appendix B; W5: 30-min debrief interviews with 8–10 participants across groups.</li>
+  <li><strong>Case tracker</strong> (in <code>snyk-pilot-scorecard.xlsx</code>): every case gets a status (Pass / Fail / Blocked / N/A) + measured value + note; EX-1/EX-2 and the Section 10 verdicts compute automatically.</li>
+  <li><strong>Weekly 5-minute survey</strong> (W1–W4): scans run, failures, blockers, triage decisions, time-to-triage (feeds M-3, M-8).</li>
+  <li><strong>Issue log:</strong> every bug/blocker tagged by component (CLI/IDE/network/docs) and severity; escalations from TRI-05 tracked here (feeds M-12).</li>
+  <li><strong>Triage audit trail:</strong> ignore reasons/expiry in <code>.snyk</code> files and the Snyk UI; weekly Critical/High burn-down from the Org UI (feeds M-9).</li>
+  <li><strong>W4 mini-survey:</strong> 5 questions (Appendix B), entered into the scorecard workbook — averages and % Yes compute automatically (feeds F-1…F-5).</li>
+  <li><strong>W5 debriefs:</strong> 30-min interviews with 8–10 participants; qualitative context for any FAIL verdict.</li>
 </ul>
 
 <h2 id="s10">10. Success Criteria (Go/No-Go for Phase 2)</h2>
-<div class="callout ok"><strong>Overall rule:</strong> The pilot is <strong>SUCCESSFUL</strong> if all P0 criteria pass AND at least 7 of 9 aggregate thresholds below are met. A "conditional pass" (proceed with documented remediation) applies if exactly one P0 criterion fails with a clear vendor/config fix identified.</div>
+<div class="callout ok"><strong>Overall rule:</strong> The pilot is <strong>SUCCESSFUL (GO)</strong> if <strong>all 4 P0 gates pass</strong> AND <strong>at least 5 of the 7 aggregate criteria meet their targets</strong>. A "conditional pass" applies if exactly one P0 gate fails with a clear vendor/config fix identified. Every criterion below lists the test cases that produce its evidence.</div>
 <table>
-  <tr><th>#</th><th>Criterion</th><th>Threshold</th><th>Type</th></tr>
-  <tr><td>SC-1</td><td>All P0 test cases (CLI-01→04, CLI-10→12, CLI-20→21, TRI-01→02, IDE-01→02, IDE-10→12, XC-01→02) executed with expected results, or failures root-caused with acceptable workaround</td><td>100% P0 executed; no open blocker</td><td><span class="badge b-p0">P0 gate</span></td></tr>
-  <tr><td>SC-2</td><td>Setup success rate across 40 participants</td><td class="kpi">≥ 90%</td><td>Aggregate</td></tr>
-  <tr><td>SC-3</td><td>Scan success rate (CLI + IDE)</td><td class="kpi">≥ 95%</td><td>Aggregate</td></tr>
-  <tr><td>SC-4</td><td>Seeded Critical/High vulnerabilities detected</td><td class="kpi">100%</td><td><span class="badge b-p0">P0 gate</span></td></tr>
-  <tr><td>SC-5</td><td>Snyk Code false-positive rate (champion-reviewed)</td><td class="kpi">≤ 30%</td><td>Aggregate</td></tr>
-  <tr><td>SC-6</td><td>Continued-use intent after pilot</td><td class="kpi">≥ 70% of participants</td><td>Aggregate</td></tr>
-  <tr><td>SC-7</td><td>SUS score (CLI and IDE, separately — Appendix B)</td><td class="kpi">≥ 68 each</td><td>Aggregate</td></tr>
-  <tr><td>SC-8</td><td>Zero unresolved corporate-network blockers (proxy/CA/allowlist)</td><td class="kpi">0 open</td><td><span class="badge b-p0">P0 gate</span></td></tr>
-  <tr><td>SC-9</td><td>Security/data-governance sign-off on outbound data (deeproxy etc.)</td><td class="kpi">Signed off</td><td><span class="badge b-p0">P0 gate</span></td></tr>
-  <tr><td>SC-10</td><td>Findings fixed by ≥ 60% of participants</td><td class="kpi">≥ 60%</td><td>Aggregate</td></tr>
-  <tr><td>SC-11</td><td>Triage decision coverage on Critical/High findings (TRI-02/TRI-06)</td><td class="kpi">≥ 90%</td><td>Aggregate</td></tr>
+  <tr><th>#</th><th>Criterion</th><th>Linked Test Cases</th><th>Threshold</th><th>Type</th></tr>
+  <tr><td>SC-1</td><td>P0 case pass rate (EX-1)</td><td class="lnk">CLI-01→04, CLI-10→12, CLI-20→21, TRI-01→02, IDE-01→02, IDE-10→12, XC-01→02</td><td class="kpi">100% Pass (no open blocker)</td><td><span class="badge b-p0">P0 gate</span></td></tr>
+  <tr><td>SC-2</td><td>Seeded-vulnerability detection (M-4)</td><td class="lnk">CLI-11</td><td class="kpi">100% of seeded Critical/High</td><td><span class="badge b-p0">P0 gate</span></td></tr>
+  <tr><td>SC-3</td><td>Open network blockers after W1 (M-12)</td><td class="lnk">XC-01, CLI-04, IDE-02</td><td class="kpi">0</td><td><span class="badge b-p0">P0 gate</span></td></tr>
+  <tr><td>SC-4</td><td>Security/data-governance sign-off</td><td class="lnk">XC-02, CLI-23</td><td class="kpi">Signed off</td><td><span class="badge b-p0">P0 gate</span></td></tr>
+  <tr><td>SC-5</td><td>Setup success rate (M-1)</td><td class="lnk">CLI-01→04, IDE-01→02</td><td class="kpi">≥ 90%</td><td>Aggregate</td></tr>
+  <tr><td>SC-6</td><td>Scan success rate (M-3)</td><td class="lnk">CLI-10, CLI-20, CLI-22, IDE-10, IDE-11</td><td class="kpi">≥ 95%</td><td>Aggregate</td></tr>
+  <tr><td>SC-7</td><td>Snyk Code false-positive rate (M-6)</td><td class="lnk">CLI-21</td><td class="kpi">≤ 30%</td><td>Aggregate</td></tr>
+  <tr><td>SC-8</td><td>Fix-and-verify pass rate (M-7)</td><td class="lnk">TRI-04, IDE-13</td><td class="kpi">≥ 95%</td><td>Aggregate</td></tr>
+  <tr><td>SC-9</td><td>Triage loop health (M-8 + M-9)</td><td class="lnk">TRI-02, TRI-06</td><td class="kpi">Median ≤ 5 min AND coverage ≥ 90%</td><td>Aggregate</td></tr>
+  <tr><td>SC-10</td><td>Overall ratings CLI &amp; IDE (F-1, F-2)</td><td class="lnk">CLI suite / IDE suite</td><td class="kpi">≥ 4.0 / 5 each</td><td>Aggregate</td></tr>
+  <tr><td>SC-11</td><td>Continued-use intent (F-4)</td><td class="lnk">All cases</td><td class="kpi">≥ 70% Yes</td><td>Aggregate</td></tr>
 </table>
-<p><strong>Interpretation guidance:</strong> A low NPS with high detection accuracy suggests UX/education issues (fixable in rollout, not a vendor blocker). Low detection accuracy, unresolvable network incompatibility, or a broken triage loop are vendor/architecture blockers and should trigger competitive re-evaluation before Phase 2 investment.</p>
+<p><strong>How to read failures (traceable by design):</strong> each failed criterion names its cases, so the pilot report can point at exactly what broke. Examples: SC-7 fail → finding quality problem, check CLI-21 FP list; SC-9 fail → triage loop problem, review TRI-02/TRI-06 notes; SC-5 fail → onboarding/docs problem, review CLI-01–04 blocker notes. P0-gate failures (detection, network, security sign-off) are vendor/architecture blockers and should trigger competitive re-evaluation before Phase 2 investment.</p>
 
 <h2 id="s11">11. Risks &amp; Mitigations</h2>
 <table>
@@ -356,20 +373,20 @@
   <tr><td>Security team objects to code snippets leaving network (Snyk Code)</td><td>High</td><td>Run XC-02 review in W0/W1; if rejected, scope Phase 1 to SCA + IaC only and defer SAST decision.</td></tr>
   <tr><td>Broker cannot be deployed in the intranet short-term, blocking Phase 2 planning</td><td>Medium</td><td>Accept as a Phase 2 gating dependency; use Phase 1 network findings (XC-01) to pre-draft Broker architecture, host, and allowlist requirements so Phase 2 can start immediately once deployment is feasible.</td></tr>
   <tr><td>Triage loop breaks down without Jira/SCM integration (decisions lost, no assignment)</td><td>Medium</td><td>Compensate with weekly champion-led triage review (TRI-06) + issue log; capture missing capabilities in TRI-07 as Phase 2 requirements.</td></tr>
-  <tr><td>Participant drop-off / survey fatigue</td><td>Medium</td><td>Keep weekly survey ≤ 5 min; office-hours twice weekly; manager endorsement; small incentives.</td></tr>
+  <tr><td>Participant drop-off / survey fatigue</td><td>Medium</td><td>Keep weekly survey ≤ 5 min; W4 mini-survey ≤ 2 min; office-hours twice weekly; manager endorsement.</td></tr>
   <tr><td>Plan limits (test counts) hit during heavy scanning</td><td>Medium</td><td>Confirm limits with vendor in W0; monitor usage in Org UI weekly.</td></tr>
   <tr><td>Results skewed by unrepresentative repos</td><td>Medium</td><td>Repo selection reviewed by Security Champions; ensure ≥ 4 languages and legacy + modern codebases.</td></tr>
-  <tr><td>False-positive fatigue biases feedback negative</td><td>Low–Med</td><td>Teach ignore/severity-threshold workflows in onboarding; measure FP objectively via champion review, not only sentiment.</td></tr>
+  <tr><td>False-positive fatigue biases feedback negative</td><td>Low–Med</td><td>Teach ignore/severity-threshold workflows in onboarding; measure FP objectively via CLI-21 champion review, not only sentiment.</td></tr>
 </table>
 
 <h2 id="s12">12. Exit Criteria &amp; Next Phase</h2>
 <h3>12.1 Pilot Exit Criteria</h3>
 <ul>
-  <li>All test cases executed (pass/fail recorded); issue log triaged to zero untriaged items.</li>
-  <li>Metrics aggregated; final pilot report written with per-criterion verdicts.</li>
+  <li>All test cases executed with status recorded in the scorecard workbook; issue log triaged to zero untriaged items.</li>
+  <li>Scorecard finalized: all Section 9 metrics populated; Section 10 verdicts computed.</li>
   <li>Go/no-go recommendation presented to stakeholders with:</li>
   <ul>
-    <li>Success-criteria scorecard (Section 10),</li>
+    <li>Success-criteria scorecard (Section 10) with case-level evidence,</li>
     <li>Top issues &amp; vendor support experience,</li>
     <li>Triage-workflow gap list (TRI-07) — what Jira/SCM integration must provide in Phase 2,</li>
     <li>Phase 2 requirements (Broker architecture, endpoint allowlist delta, SCM/CI integration plan, estimated effort).</li>
@@ -381,7 +398,7 @@
   <li>Once Broker is available: integrate internal GitLab/GitHub Enterprise for repo import &amp; automated fix PRs.</li>
   <li>CI gate design using validated exit-code/severity-threshold behavior from CLI-16.</li>
   <li>Jira/Slack integration to close the triage gaps identified in TRI-07 (assignment, notifications, SLA tracking).</li>
-  <li>Policy &amp; governance setup; expand to full engineering org based on Phase 1 SUS/NPS learnings.</li>
+  <li>Policy &amp; governance setup; expand to full engineering org based on Phase 1 scorecard results and debrief learnings.</li>
   <li>Snyk Container and other Snyk capabilities remain out of scope and would require a separate evaluation if needed later.</li>
 </ul>
 
@@ -390,93 +407,39 @@
   <h4>Pilot Participant Weekly Survey (≤ 5 min)</h4>
   <ol>
     <li>Which tools did you use this week? ☐ CLI ☐ VS Code plugin ☐ JetBrains plugin</li>
-    <li>How many scans did you run? (roughly)</li>
+    <li>How many scans did you run? (roughly) How many failed? → feeds M-3</li>
     <li>Did any scan fail or behave unexpectedly? (describe + attach command/error)</li>
-    <li>Did you hit any network/proxy/certificate issues?</li>
-    <li>Did Snyk find anything real &amp; useful? Did you fix anything?</li>
-    <li>How many findings did you triage this week (fix / ignore / escalate)? Roughly how long did each triage decision take?</li>
-    <li>Any finding you believe is a false positive? (link/screenshot)</li>
-    <li>Rate this week's experience: 1 (frustrating) – 5 (smooth)</li>
+    <li>Did you hit any network/proxy/certificate issues? → feeds M-12</li>
+    <li>Did Snyk find anything real &amp; useful? Did you fix anything? → feeds M-7</li>
+    <li>How many findings did you triage (fix / ignore / escalate)? Roughly how long per decision? → feeds M-8</li>
+    <li>Any finding you believe is a false positive? (link/screenshot) → feeds M-6</li>
     <li>Anything blocking you next week?</li>
   </ol>
 </div>
 
-<h2 id="appb">Appendix B — NPS &amp; SUS Explained (Definitions &amp; Calculation)</h2>
-<p>Two standardized instruments are used in the W4 survey to quantify subjective experience. Both are industry-standard, benchmarked methods — using them lets us compare Snyk's scores against published norms instead of relying on ad-hoc "did you like it?" questions.</p>
+<h2 id="appb">Appendix B — W4 Mini-Survey &amp; Scoring</h2>
+<p>Five direct questions, two answer formats, two computations. Each question maps to the test cases it reflects, so a low score points at a concrete part of the pilot.</p>
 
-<h3>B.1 NPS — Net Promoter Score</h3>
-<p><strong>What it is:</strong> NPS is a loyalty/advocacy metric created by Fred Reichheld (Bain &amp; Company, 2003). It measures whether users would actively recommend the product — a strong proxy for whether developers would champion Snyk internally after the pilot.</p>
-<h4>The question (exactly one)</h4>
-<div class="callout">"On a scale of 0–10, how likely are you to recommend <strong>Snyk</strong> to a colleague?"<br>0 = Not at all likely · 10 = Extremely likely</div>
-<h4>Grouping of respondents</h4>
+<h3>B.1 The 5 Questions</h3>
 <table>
-  <tr><th>Score</th><th>Category</th><th>Meaning</th></tr>
-  <tr><td>9–10</td><td><strong>Promoters</strong></td><td>Enthusiastic; will advocate for adoption</td></tr>
-  <tr><td>7–8</td><td><strong>Passives</strong></td><td>Satisfied but unenthusiastic; excluded from the formula</td></tr>
-  <tr><td>0–6</td><td><strong>Detractors</strong></td><td>Unhappy; will resist or bad-mouth the rollout</td></tr>
+  <tr><th>#</th><th>Question</th><th>Format</th><th>Metric</th><th>Linked Cases</th><th>Target</th></tr>
+  <tr><td>Q1</td><td>Rate your overall experience with the <strong>Snyk CLI</strong>.</td><td>1–5</td><td>F-1</td><td class="lnk">CLI suite</td><td class="kpi">avg ≥ 4.0</td></tr>
+  <tr><td>Q2</td><td>Rate your overall experience with the <strong>Snyk IDE plugin</strong>.</td><td>1–5</td><td>F-2</td><td class="lnk">IDE suite</td><td class="kpi">avg ≥ 4.0</td></tr>
+  <tr><td>Q3</td><td>Rate how <strong>clear &amp; actionable</strong> the findings are.</td><td>1–5</td><td>F-3</td><td class="lnk">CLI-21, TRI-01</td><td class="kpi">avg ≥ 4.0</td></tr>
+  <tr><td>Q4</td><td>Would you <strong>keep using Snyk</strong> after the pilot?</td><td>Y/N</td><td>F-4</td><td class="lnk">All</td><td class="kpi">≥ 70% Yes</td></tr>
+  <tr><td>Q5</td><td>Did you <strong>complete setup without asking for help</strong>?</td><td>Y/N</td><td>F-5</td><td class="lnk">XC-03, CLI-01, IDE-01</td><td class="kpi">≥ 80% Yes</td></tr>
 </table>
-<h4>Calculation</h4>
-<div class="formula">NPS = (% of Promoters) − (% of Detractors)   ·   range: −100 to +100</div>
-<p><strong>Worked example</strong> (all 40 pilot participants respond): 18 Promoters (45%), 14 Passives (35%), 8 Detractors (20%):</p>
-<div class="formula">NPS = 45% − 20% = <strong>+25</strong>  → meets our target of ≥ 20</div>
-<h4>Interpretation benchmarks</h4>
-<table>
-  <tr><th>NPS</th><th>Reading</th></tr>
-  <tr><td>&lt; 0</td><td>More detractors than promoters — serious adoption risk</td></tr>
-  <tr><td>0–20</td><td>Acceptable; lukewarm</td></tr>
-  <tr><td>20–50</td><td>Good (our pilot target: <strong>≥ 20</strong>)</td></tr>
-  <tr><td>&gt; 50</td><td>Excellent; strong internal champions likely</td></tr>
-</table>
-<p><strong>Administration in this pilot:</strong> included as a single question in the W4 survey, answered once per participant, scored on the whole Snyk experience (CLI + IDE combined). Optional follow-up: "What is the main reason for your score?" (free text, used in debrief).</p>
+<p>Participants who only used one surface answer only Q1 or Q2; blanks are excluded from averages. Optional free-text: "Biggest pain point?" — used in W5 debriefs.</p>
 
-<h3>B.2 SUS — System Usability Scale</h3>
-<p><strong>What it is:</strong> SUS is a standardized 10-item usability questionnaire created by John Brooke (Digital Equipment Corporation, 1986). Despite its age it remains the most widely used quick usability instrument because it is technology-agnostic, reliable even with small samples (works with n ≥ ~12), and produces a single 0–100 score with well-published benchmarks.</p>
-<h4>The 10 standard statements</h4>
-<p>Each is answered on a 5-point Likert scale: <strong>1 = Strongly disagree … 5 = Strongly agree</strong>. The wording alternates positive/negative on purpose (reduces acquiescence bias).</p>
-<ol>
-  <li>I think that I would like to use this system frequently.</li>
-  <li>I found the system unnecessarily complex.</li>
-  <li>I thought the system was easy to use.</li>
-  <li>I think that I would need the support of a technical person to be able to use this system.</li>
-  <li>I found the various functions in this system were well integrated.</li>
-  <li>I thought there was too much inconsistency in this system.</li>
-  <li>I would imagine that most people would learn to use this system very quickly.</li>
-  <li>I found the system very cumbersome to use.</li>
-  <li>I felt very confident using the system.</li>
-  <li>I needed to learn a lot of things before I could get going with this system.</li>
-</ol>
-<h4>Calculation (per respondent)</h4>
+<h3>B.2 Scoring</h3>
 <div class="formula">
-Odd items  (1,3,5,7,9): contribution = response − 1<br>
-Even items (2,4,6,8,10): contribution = 5 − response<br>
-SUS score = (sum of all 10 contributions) × 2.5   ·   range: 0–100
+Rating (F-1/F-2/F-3)  = (sum of 1–5 answers) ÷ (number of answers)     → target ≥ 4.0<br>
+Yes/No (F-4/F-5)      = (count of "Yes") ÷ (number of answers) × 100%  → target per metric
 </div>
-<p><strong>Worked example:</strong> a participant answers Q1=4, Q2=2, Q3=5, Q4=1, Q5=4, Q6=2, Q7=4, Q8=1, Q9=5, Q10=2:</p>
-<div class="formula">
-Odd:  (4−1)+(5−1)+(4−1)+(4−1)+(5−1) = 3+4+3+3+4 = 17<br>
-Even: (5−2)+(5−1)+(5−2)+(5−1)+(5−2) = 3+4+3+4+3 = 17<br>
-SUS = (17 + 17) × 2.5 = <strong>85</strong>  → excellent usability
-</div>
-<p><strong>Group score:</strong> average the individual SUS scores across respondents (do <em>not</em> average the raw item answers first).</p>
-<h4>Interpretation benchmarks (published norms, ~68 = historical average)</h4>
-<table>
-  <tr><th>SUS</th><th>Reading</th></tr>
-  <tr><td>&lt; 50</td><td>Poor — significant usability problems</td></tr>
-  <tr><td>50–68</td><td>Marginal — below average</td></tr>
-  <tr><td>68–80</td><td>Good — above average (our pilot target: <strong>≥ 68</strong>)</td></tr>
-  <tr><td>&gt; 80</td><td>Excellent — users can self-serve</td></tr>
-</table>
-<p><strong>Administration in this pilot:</strong> the 10 items are answered <strong>twice per participant in W4</strong> — once with "the system" = Snyk CLI, once with "the system" = Snyk IDE plugin — so CLI and IDE get separate SUS scores (SC-7 requires ≥ 68 for each). Participants who only used one surface answer only that version. "System" in each item is replaced by "the Snyk CLI" / "the Snyk IDE plugin" respectively.</p>
-
-<h3>B.3 Why both?</h3>
-<ul>
-  <li><strong>SUS</strong> measures <em>usability</em> (can people use it effectively?) — diagnostic for UX friction.</li>
-  <li><strong>NPS</strong> measures <em>advocacy</em> (will people push for it?) — predictive of rollout success.</li>
-  <li>Together they separate the two classic pilot failure modes: "usable but nobody cares" (high SUS, low NPS → value-positioning problem) and "valuable but painful" (low SUS, high NPS → UX/education problem, fixable in rollout).</li>
-</ul>
+<p><strong>Worked example:</strong> 38 of 40 participants respond. Q1 answers sum to 160 → F-1 = 160 ÷ 38 = <strong>4.2</strong> → PASS (≥ 4.0). Q4: 29 Yes of 38 → F-4 = <strong>76%</strong> → PASS (≥ 70%). Both feed Section 10 verdicts directly (SC-10, SC-11).</p>
 
 <footer>
-  Snyk Internal Pilot Testing Plan — Phase 1 (CLI &amp; IDE, pre-Broker; SAST + SCA + IaC only). v1.2, updated 2026-08-07. Internal use only.
+  Snyk Internal Pilot Testing Plan — Phase 1 (CLI &amp; IDE, pre-Broker; SAST + SCA + IaC only). v1.4, updated 2026-08-07. Internal use only.
 </footer>
 
 </div>
