@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snyk SCA Pilot Testing Guide — IDE &amp; CLI</title>
+<style>
+  :root{
+    --ink:#1c2430; --muted:#5b6774; --line:#dfe5ec; --bg:#f6f8fa;
+    --accent:#4b45ce; --accent-soft:#eef0ff; --warn-bg:#fff7e6; --warn-line:#f0c36d;
+    --ok-bg:#eafaf0; --ok-line:#58c184; --code-bg:#23272e;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.62;font-size:15px;}
+  .wrap{max-width:980px;margin:0 auto;padding:40px 28px 80px;}
+  header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:34px;}
+  header.doc h1{margin:0 0 6px;font-size:29px;letter-spacing:.2px;}
+  header.doc .sub{color:var(--muted);font-size:15px;}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .meta span{background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px 10px;font-size:12.5px;color:var(--muted);}
+  h2{font-size:22px;margin:48px 0 14px;padding-left:12px;border-left:4px solid var(--accent);}
+  h3{font-size:17px;margin:30px 0 10px;color:#2b3442;}
+  h4{font-size:15px;margin:20px 0 8px;}
+  p{margin:8px 0;}
+  ul,ol{margin:8px 0 8px 22px;padding:0;}
+  li{margin:5px 0;}
+  code{background:#eef1f5;border-radius:4px;padding:1.5px 6px;font-family:Consolas,"Courier New",monospace;font-size:13px;color:#b34700;}
+  pre{background:var(--code-bg);color:#e6e6e6;border-radius:8px;padding:14px 18px;overflow-x:auto;margin:12px 0;}
+  pre code{background:none;color:inherit;padding:0;font-size:13px;line-height:1.55;}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.8px;background:#fff;}
+  th{background:#2b3442;color:#fff;text-align:left;padding:9px 12px;font-weight:600;}
+  td{border:1px solid var(--line);padding:9px 12px;vertical-align:top;}
+  tr:nth-child(even) td{background:#fafbfc;}
+  .note{border:1px solid var(--line);border-left:4px solid var(--accent);background:#fff;border-radius:6px;padding:12px 16px;margin:14px 0;}
+  .warn{border:1px solid var(--warn-line);border-left:5px solid #e8a13a;background:var(--warn-bg);border-radius:6px;padding:14px 18px;margin:16px 0;}
+  .ok{border:1px solid var(--ok-line);border-left:5px solid #3aa76d;background:var(--ok-bg);border-radius:6px;padding:12px 16px;margin:16px 0;}
+  .warn strong.tag,.note strong.tag,.ok strong.tag{display:block;font-size:12px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px;}
+  .warn strong.tag{color:#b06f00;} .note strong.tag{color:var(--accent);} .ok strong.tag{color:#23794e;}
+  .step{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin:18px 0;box-shadow:0 1px 3px rgba(20,30,50,.05);}
+  .step h3{margin-top:0;display:flex;align-items:center;gap:10px;}
+  .step .num{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:50%;
+    background:var(--accent);color:#fff;font-size:14px;font-weight:700;flex:0 0 auto;}
+  .ref{font-size:13px;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);color:var(--muted);}
+  .ref a{color:var(--accent);word-break:break-all;}
+  a{color:var(--accent);}
+  .toc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px 26px;margin:26px 0;}
+  .toc ol{margin:6px 0 6px 20px;}
+  .kbd{border:1px solid #c8ced6;border-bottom-width:2px;border-radius:5px;padding:0 6px;font-size:12.5px;background:#fff;font-family:Consolas,monospace;}
+  .checklist li{list-style:none;margin:7px 0;}
+  .checklist li::before{content:"☐ ";color:var(--accent);font-weight:700;}
+  footer{margin-top:60px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;}
+  @media print{body{background:#fff;} .step,.toc,.note,.warn,.ok{box-shadow:none;break-inside:avoid;} a{color:#000;text-decoration:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="doc">
+  <h1>Snyk SCA (Open Source) Pilot Testing Guide</h1>
+  <div class="sub">Scope: IDE plugins &amp; CLI only · Authentication: Personal Access Token (PAT) · Language: English</div>
+  <div class="meta">
+    <span>Document version: 1.0</span>
+    <span>Date: 2026-08-13</span>
+    <span>Audience: Pilot testers / Security champions</span>
+    <span>Environment: Internal network (no SSO)</span>
+  </div>
+</header>
+
+<div class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li>Pilot scope and objectives</li>
+    <li>Prerequisites</li>
+    <li>Key concept: Snyk SCA requires full dependency resolution</li>
+    <li>Phase 1 — CLI pilot (step by step)</li>
+    <li>Phase 2 — IDE pilot (step by step)</li>
+    <li>Pilot success criteria</li>
+    <li>Troubleshooting</li>
+    <li>Official reference links</li>
+  </ol>
+</div>
+
+<!-- ===================== 1. SCOPE ===================== -->
+<h2>1. Pilot scope and objectives</h2>
+<p>This pilot evaluates <strong>Snyk Open Source (SCA)</strong> — detection of known vulnerabilities and license issues in third-party dependencies. The goal is to confirm that testers can authenticate with a PAT, prepare a project so that Snyk can resolve its <em>complete</em> dependency tree, and successfully trigger a scan both from the CLI and from an IDE.</p>
+
+<table>
+  <tr><th style="width:50%">In scope</th><th>Out of scope</th></tr>
+  <tr>
+    <td>
+      <ul>
+        <li>Snyk CLI: install, PAT authentication, <code>snyk test</code>, <code>snyk monitor</code></li>
+        <li>IDE plugins: Visual Studio Code and JetBrains (IntelliJ IDEA, WebStorm, PyCharm, etc.)</li>
+        <li>Open-source dependency scanning (SCA) only</li>
+      </ul>
+    </td>
+    <td>
+      <ul>
+        <li>Snyk Code (SAST), Container, IaC, Secrets</li>
+        <li>SCM (Git repository) integrations and PR checks</li>
+        <li>CI/CD pipeline integration</li>
+        <li>SSO / OAuth browser-based login (not available on the internal network)</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+<!-- ===================== 2. PREREQUISITES ===================== -->
+<h2>2. Prerequisites</h2>
+
+<div class="step">
+  <h3><span class="num">P1</span>Snyk account and Organization</h3>
+  <ul>
+    <li>Each tester needs a Snyk account assigned to the pilot <strong>Organization</strong> (Enterprise plan recommended for PAT support).</li>
+    <li><strong>PAT availability note:</strong> according to Snyk documentation, Personal Access Token authentication is progressively rolled out to Enterprise customers. If the <em>Personal Access Tokens</em> page is not visible in your account settings, ask the Snyk account team to enable it. If PAT cannot be enabled in time, fall back to the <em>legacy personal API token</em> — the CLI and IDE configuration commands below are identical for both token types.</li>
+  </ul>
+  <div class="ref">Official link — Obtain a PAT / API token: <a href="https://docs.snyk.io/getting-started-guides/getting-started">https://docs.snyk.io/getting-started-guides/getting-started</a> (section “Obtain and use your Snyk API token”)</div>
+</div>
+
+<div class="step">
+  <h3><span class="num">P2</span>Network access (internal network / proxy)</h3>
+  <p>Because the pilot runs on an internal network without SSO, confirm the following <strong>before</strong> starting:</p>
+  <ul>
+    <li>Outbound HTTPS (443) to <code>app.snyk.io</code> and <code>api.snyk.io</code> (or your regional endpoint such as <code>api.eu.snyk.io</code>) must be allowed through the firewall/proxy.</li>
+    <li>Outbound HTTPS to <code>downloads.snyk.io</code> is required if the IDE plugin should auto-download the Snyk CLI binary. If this is blocked, install the CLI manually first (Phase 1) and point the IDE plugin to it.</li>
+    <li>If your proxy uses a self-signed/internal CA certificate, the Snyk CLI supports an <code>--insecure</code> option and the IDE plugins expose an “Insecure (skip SSL verification)” setting. Use only when connecting through your internal CA.</li>
+    <li>Standard proxy environment variables (<code>HTTPS_PROXY</code> / <code>HTTP_PROXY</code>) are honored by the CLI.</li>
+  </ul>
+  <div class="ref">Official link — VS Code extension configuration, environment variables and proxy: <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/visual-studio-code-extension-configuration-environment-variables-and-proxy">https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/visual-studio-code-extension-configuration-environment-variables-and-proxy</a></div>
+  <div class="ref">Official link — Unified IDE Configuration Dialog (Setup tab: endpoint, insecure, CLI path): <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/unified-ide-configuration-dialog">https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/unified-ide-configuration-dialog</a></div>
+</div>
+
+<div class="step">
+  <h3><span class="num">P3</span>Package managers installed and on PATH</h3>
+  <p>Snyk CLI is a build-time tool: for SCA it invokes the project’s own package manager to build the dependency tree. Per the official “Getting started with the Snyk CLI” page: <em>“Before you can use the CLI for Open Source scanning, you must install your package manager. The needed third-party tools, such as Gradle or Maven, must be in the PATH.”</em></p>
+  <ul>
+    <li>Node.js + npm (or Yarn / pnpm) for JavaScript projects</li>
+    <li>Java JDK + Maven (<code>mvn</code>) or Gradle (<code>gradle</code>/wrapper) for JVM projects</li>
+    <li>Python (<code>python</code>/<code>python3</code> + <code>pip</code>) for Python projects</li>
+    <li>.NET SDK (<code>dotnet</code>) for C# projects</li>
+    <li>Go toolchain for Go Modules projects</li>
+  </ul>
+  <div class="ref">Official link — Getting started with the Snyk CLI: <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/getting-started-with-the-snyk-cli">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/getting-started-with-the-snyk-cli</a></div>
+</div>
+
+<div class="step">
+  <h3><span class="num">P4</span>Pilot test project</h3>
+  <ul>
+    <li>Prepare one sample repository per technology stack used in your organization (e.g., one Maven project and one npm project).</li>
+    <li>The project must contain a <strong>supported manifest file</strong> at the repository root or in subfolders (see Section 3).</li>
+    <li>The project must be able to <strong>resolve/download all of its dependencies from the pilot machine</strong> — including access to your internal artifact repository (Artifactory/Nexus mirrors) if public registries are blocked.</li>
+  </ul>
+  <div class="ref">Official link — Supported languages, package managers, and frameworks: <a href="https://docs.snyk.io/supported-languages/supported-languages-package-managers-and-frameworks">https://docs.snyk.io/supported-languages/supported-languages-package-managers-and-frameworks</a></div>
+</div>
+
+<!-- ===================== 3. KEY CONCEPT ===================== -->
+<h2>3. Key concept: Snyk SCA requires full dependency resolution</h2>
+
+<div class="warn">
+  <strong class="tag">Critical — read before scanning</strong>
+  Snyk Open Source does <strong>not</strong> merely grep manifest files. <code>snyk test</code> identifies all local dependencies — direct <em>and</em> transitive — by building the <strong>full dependency tree</strong>, then queries the Snyk vulnerability database for every package in that tree. If the tree cannot be fully built (missing lockfile, package manager not installed, unreachable artifact repository, failed build/restore), the scan will either <strong>fail outright</strong> or <strong>silently under-report</strong> transitive vulnerabilities. The single most common pilot failure is scanning a project whose dependencies are not resolvable on the pilot machine.
+  <div class="ref">Official link — Snyk CLI for Open Source (how the dependency tree is built, manifest auto-detection): <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-open-source">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-open-source</a></div>
+</div>
+
+<h3>3.1 What “full resolution” means per ecosystem</h3>
+<p>Use this table to prepare each pilot project <em>before</em> triggering a scan. Rule of thumb: <strong>if <code>&lt;package manager&gt; install/restore</code> succeeds on the machine, Snyk can scan the project.</strong></p>
+
+<table>
+  <tr>
+    <th style="width:11%">Ecosystem</th>
+    <th style="width:20%">Manifest file(s) Snyk detects</th>
+    <th>Pre-scan requirements on the pilot machine</th>
+  </tr>
+  <tr>
+    <td><strong>npm / Yarn / pnpm</strong></td>
+    <td><code>package.json</code> + <code>package-lock.json</code>, <code>yarn.lock</code>, or <code>pnpm-lock.yaml</code></td>
+    <td>Commit the <strong>lockfile</strong> — Snyk builds the tree from it. Keep the lockfile in sync with <code>package.json</code> (out-of-sync lockfiles cause failures or wrong results). Node.js/npm must be installed; run <code>npm install</code> first if in doubt.</td>
+  </tr>
+  <tr>
+    <td><strong>Maven</strong></td>
+    <td><code>pom.xml</code></td>
+    <td><code>mvn</code> must be on <code>PATH</code>. Snyk executes Maven to produce the dependency list, so <code>mvn dependency:tree</code> (or a normal build) must succeed — all repositories in <code>settings.xml</code>, including internal mirrors, must be reachable. Test-scope (dev) dependencies are ignored by default; add <code>--dev</code> to include them.</td>
+  </tr>
+  <tr>
+    <td><strong>Gradle</strong></td>
+    <td><code>build.gradle</code>, <code>build.gradle.kts</code> (Kotlin DSL: CLI only)</td>
+    <td>Gradle (or the wrapper) must be on <code>PATH</code> and the dependency resolution task must succeed. <strong>Without a committed <code>gradle.lockfile</code>, Snyk officially recommends the CLI/IDE workflow</strong> — otherwise the full dependency tree may not be apparent and results will be incomplete.</td>
+  </tr>
+  <tr>
+    <td><strong>Python (pip)</strong></td>
+    <td><code>requirements.txt</code> (also Poetry <code>pyproject.toml</code>/<code>poetry.lock</code>, Pipenv <code>Pipfile</code>)</td>
+    <td>Snyk uses Python on the machine to find dependencies, so packages should be installed/resolvable in the environment, and the Python version affects the tree. Use <code>--command=python3</code> if needed, and <code>--skip-unresolved</code> for packages that exist only in a private index Snyk cannot reach. Non-default manifest names require <code>--file=&lt;name&gt; --package-manager=pip</code>.</td>
+  </tr>
+  <tr>
+    <td><strong>.NET (NuGet)</strong></td>
+    <td><code>*.csproj</code>/<code>*.sln</code>, <code>obj/project.assets.json</code>, <code>packages.config</code></td>
+    <td>The <code>dotnet</code> SDK must be installed and <code>dotnet restore</code> must succeed — Snyk uses the build system to determine installed dependencies (there is no <code>package-lock.json</code> equivalent). All <code>PackageReference</code> entries need a version attribute. A runtime SDK matching the target framework gives the most accurate tree.</td>
+  </tr>
+  <tr>
+    <td><strong>Go Modules</strong></td>
+    <td><code>go.mod</code></td>
+    <td>The Go toolchain must be available so the module graph can be resolved; internal module proxies (<code>GOPROXY</code>) must be configured if public proxy access is blocked.</td>
+  </tr>
+</table>
+
+<div class="ref" style="margin-top:6px;">
+  Official links —
+  Supported languages list: <a href="https://docs.snyk.io/supported-languages/supported-languages-list">https://docs.snyk.io/supported-languages/supported-languages-list</a> ·
+  JavaScript: <a href="https://docs.snyk.io/supported-languages/supported-languages-list/javascript">https://docs.snyk.io/supported-languages/supported-languages-list/javascript</a> ·
+  Java &amp; Kotlin: <a href="https://docs.snyk.io/supported-languages/supported-languages-list/java-and-kotlin">https://docs.snyk.io/supported-languages/supported-languages-list/java-and-kotlin</a> ·
+  Best practices for Java and Kotlin (Gradle lockfile guidance): <a href="https://docs.snyk.io/getting-started/supported-languages-and-frameworks/java-and-kotlin/best-practices-for-java-and-kotlin">https://docs.snyk.io/getting-started/supported-languages-and-frameworks/java-and-kotlin/best-practices-for-java-and-kotlin</a> ·
+  Python: <a href="https://docs.snyk.io/supported-languages/supported-languages-list/python">https://docs.snyk.io/supported-languages/supported-languages-list/python</a> ·
+  .NET: <a href="https://docs.snyk.io/supported-languages/supported-languages-list/.net">https://docs.snyk.io/supported-languages/supported-languages-list/.net</a>
+</div>
+
+<h3>3.2 Pre-flight checklist — run before every scan</h3>
+<ul class="checklist">
+  <li>A supported manifest file exists in the folder you are about to scan.</li>
+  <li>Lockfiles are committed and in sync with the manifest (npm/Yarn/pnpm, and Gradle where applicable).</li>
+  <li>The package manager is on <code>PATH</code> and its resolution command succeeds on this machine (e.g. <code>npm install</code>, <code>mvn -q dependency:tree</code>, <code>gradle dependencies</code>, <code>pip install -r requirements.txt</code>, <code>dotnet restore</code>).</li>
+  <li>All dependency sources resolve — internal artifact mirrors are configured and reachable.</li>
+  <li>If a scan fails, re-run with <code>-d</code> to capture debug logs before escalating.</li>
+</ul>
+
+<!-- ===================== 4. CLI PILOT ===================== -->
+<h2>4. Phase 1 — CLI pilot (step by step)</h2>
+
+<div class="step">
+  <h3><span class="num">1</span>Create a Personal Access Token (PAT)</h3>
+  <ol>
+    <li>Log in to the Snyk Web UI and open your <strong>personal account settings</strong>.</li>
+    <li>In the sidebar, select <strong>Personal Access Tokens</strong>.</li>
+    <li>Complete the form and click <strong>Generate new token</strong>.</li>
+    <li>Copy the token immediately and store it securely — it cannot be viewed again.</li>
+  </ol>
+  <div class="note"><strong class="tag">Note</strong>If the Personal Access Tokens page is not available for your Organization yet (progressive Enterprise rollout), use the legacy personal API token instead: <em>Account Settings → General → API Token → click to show</em>. All commands below accept either token. Do <strong>not</strong> use a Service Account token for IDE/CLI interactive testing — Snyk documents unexpected behavior for that combination.</div>
+  <div class="ref">Official link — Obtain and use your Snyk API token / PAT: <a href="https://docs.snyk.io/getting-started-guides/getting-started">https://docs.snyk.io/getting-started-guides/getting-started</a></div>
+</div>
+
+<div class="step">
+  <h3><span class="num">2</span>Install the Snyk CLI</h3>
+  <p>Pick one method (standalone binary is usually simplest behind a corporate proxy):</p>
+  <pre><code># npm (requires Node.js)
+npm install snyk -g
+
+# Windows (Scoop)
+scoop bucket add snyk https://github.com/snyk/scoop-snyk
+scoop install snyk
+
+# macOS/Linux (Homebrew)
+brew tap snyk/tap &amp;&amp; brew install snyk
+
+# Standalone binary — Windows
+# Download snyk-win.exe, rename to snyk.exe, move to C:\tools\snyk\, add to PATH
+curl https://static.snyk.io/cli/latest/snyk-win.exe -o snyk.exe
+
+# Standalone binary — Linux/macOS example
+curl --compressed https://downloads.snyk.io/cli/stable/snyk-linux -o snyk
+chmod +x ./snyk &amp;&amp; sudo mv ./snyk /usr/local/bin/</code></pre>
+  <p>Verify the installation:</p>
+  <pre><code>snyk --version</code></pre>
+  <div class="ref">Official link — Install the Snyk CLI: <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/install-the-snyk-cli">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/install-the-snyk-cli</a></div>
+</div>
+
+<div class="step">
+  <h3><span class="num">3</span>Authenticate with the PAT (no browser, no SSO)</h3>
+  <ol>
+    <li><strong>(Regional tenants only)</strong> If your Organization is hosted outside <code>SNYK-US-01</code> (e.g. <code>SNYK-EU-01</code>, <code>SNYK-US-02</code>, <code>SNYK-AU-01</code>), set the environment first:
+      <pre><code>snyk config environment SNYK-EU-01</code></pre>
+    </li>
+    <li>Authenticate with the PAT — this is fully headless and needs no browser:
+      <pre><code>snyk auth &lt;YOUR_PAT&gt;</code></pre>
+      Expected result: <code>Your account has been authenticated.</code>
+    </li>
+    <li>Alternative, equivalent methods (use whichever your security policy prefers):
+      <pre><code># Persist via config
+snyk config set api=&lt;YOUR_PAT&gt;
+
+# Or via environment variable (recommended for shared/temporary shells)
+export SNYK_TOKEN=&lt;YOUR_PAT&gt;          # Linux/macOS
+setx SNYK_TOKEN "&lt;YOUR_PAT&gt;"            # Windows (new shells)</code></pre>
+    </li>
+    <li>Sanity check connectivity and auth:
+      <pre><code>snyk test --help</code></pre>
+    </li>
+  </ol>
+  <div class="ref">Official link — Authenticate to use the CLI (PAT / token / env var / regional environments): <a href="https://docs.snyk.io/developer-tools/snyk-cli/authenticate-to-use-the-cli">https://docs.snyk.io/developer-tools/snyk-cli/authenticate-to-use-the-cli</a></div>
+</div>
+
+<div class="step">
+  <h3><span class="num">4</span>Prepare the project for a complete scan</h3>
+  <ol>
+    <li>Clone/copy the pilot project onto the machine and open a terminal at the folder that contains the manifest file.</li>
+    <li>Run the ecosystem’s own resolution command and make sure it succeeds (see Section 3.1). Example for Maven:
+      <pre><code>mvn -q dependency:tree        # must complete without errors</code></pre>
+      Example for npm:
+      <pre><code>npm install                   # ensures lockfile is in sync</code></pre>
+    </li>
+    <li>Only proceed when the package manager itself can fully resolve dependencies on this machine.</li>
+  </ol>
+  <div class="ref">Official link — Snyk CLI for Open Source (manifest auto-detection list): <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-open-source">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-open-source</a></div>
+</div>
+
+<div class="step">
+  <h3><span class="num">5</span>Trigger the scan — <code>snyk test</code></h3>
+  <pre><code>cd /path/to/pilot-project
+snyk test</code></pre>
+  <p>Useful options during the pilot:</p>
+  <pre><code>snyk test --all-projects            # scan every manifest in the repo (monorepos)
+snyk test --file=pom.xml            # target a specific manifest
+snyk test --org=&lt;ORG_ID&gt;            # report against the pilot Organization
+snyk test --severity-threshold=high # only show high/critical issues
+snyk test --json                    # machine-readable output for evidence capture
+snyk test -d                        # debug output (attach this when reporting issues)</code></pre>
+  <p>Interpret the exit code: <code>0</code> = scan completed, no vulnerabilities · <code>1</code> = scan completed, vulnerabilities found · <code>2</code> = failure, re-run with <code>-d</code> · <code>3</code> = no supported project detected (go back to Step 4).</p>
+  <div class="ok"><strong class="tag">Success signal</strong>The CLI prints the dependency tree analysis (“Tested N dependencies for known issues…”) and an issue list with severity, package paths (direct vs. transitive), and fix advice. Seeing <em>“0 issues”</em> is also a successful scan — verify the dependency count matches your expectation, otherwise the tree may have been truncated.</div>
+  <div class="ref">Official link — <code>snyk test</code> command reference: <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/test">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/test</a></div>
+</div>
+
+<div class="step">
+  <h3><span class="num">6</span>(Optional) Publish results — <code>snyk monitor</code></h3>
+  <p>To create a continuously monitored Project snapshot in the Snyk Web UI:</p>
+  <pre><code>snyk monitor --org=&lt;ORG_ID&gt; --project-name=&lt;pilot-project-name&gt;</code></pre>
+  <p>Then log in to the Snyk Web UI and confirm the Project appears on the <strong>Projects</strong> page with the same dependency count. Re-run <code>snyk monitor</code> after dependency changes — it does not update automatically.</p>
+  <div class="ref">Official link — <code>snyk monitor</code> command reference: <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/monitor">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/monitor</a></div>
+</div>
+
+<div class="warn">
+  <strong class="tag">Security notice — code execution</strong>
+  Because <code>snyk test</code> invokes the package manager (and may execute build logic, e.g. Gradle), only scan projects you trust. Review the official code execution warning referenced from the <code>snyk test</code> and <code>monitor</code> documentation pages before scanning third-party code.
+</div>
+
+<!-- ===================== 5. IDE PILOT ===================== -->
+<h2>5. Phase 2 — IDE pilot (step by step)</h2>
+
+<p>Both IDE plugins below scan SCA (Open Source) by default. Because OAuth/SSO browser login is unavailable on the internal network, <strong>every IDE must be switched to the “Personal Access Token” authentication method and given the PAT manually</strong>.</p>
+
+<h3>5.1 Visual Studio Code</h3>
+
+<div class="step">
+  <h3><span class="num">1</span>Install the extension</h3>
+  <ol>
+    <li>Open VS Code → <strong>Extensions</strong> (<span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">X</span>) → search <strong>“Snyk Security”</strong> → <strong>Install</strong>.</li>
+    <li>By default the extension auto-downloads the Snyk CLI (requires access to <code>downloads.snyk.io</code>). If that host is blocked, open the Snyk settings and set <strong>CLI path</strong> to the binary installed in Phase 1, Step 2 (disable “Manage binaries automatically” if needed).</li>
+  </ol>
+  <div class="ref">Official link — Unified IDE Configuration Dialog (CLI path, release channel, download base URL): <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/unified-ide-configuration-dialog">https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/unified-ide-configuration-dialog</a></div>
+</div>
+
+<div class="step">
+  <h3><span class="num">2</span>Switch authentication to PAT</h3>
+  <ol>
+    <li>Click the <strong>Snyk icon</strong> in the Activity Bar → <strong>Settings</strong> (gear icon).</li>
+    <li>Find <strong>Authentication Method</strong> and change it to <strong>Personal Access Token</strong>.</li>
+    <li>Open the Command Palette (<span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">P</span>) → run <code>Snyk: Set Token</code> → paste the PAT.</li>
+    <li>(Regional tenants) set the <strong>Custom Endpoint</strong> to your region’s API URL; for <code>https://api.snyk.io</code> no configuration is required.</li>
+  </ol>
+  <div class="ref">Official link — Authentication for the Visual Studio Code extension (PAT steps): <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/authentication-for-visual-studio-code-extension">https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/authentication-for-visual-studio-code-extension</a></div>
+</div>
+
+<div class="step">
+  <h3><span class="num">3</span>Open the project and trigger the SCA scan</h3>
+  <ol>
+    <li><strong>File → Open Folder</strong> → select the folder containing the manifest file (same preparation as CLI Step 4 — dependencies must be resolvable on this machine; the plugin runs the same Snyk CLI engine under the hood).</li>
+    <li>When prompted, <strong>trust the workspace folder</strong> (Snyk only scans trusted folders).</li>
+    <li>The analysis starts automatically. To run it manually: Snyk panel → <strong>rescan</strong>, or Command Palette → <code>Snyk: Rescan</code>.</li>
+    <li>Confirm results appear under the <strong>Open Source Security</strong> tree in the Snyk panel, with direct/transitive paths and fix advice.</li>
+  </ol>
+  <div class="ok"><strong class="tag">Success signal</strong>The Snyk panel lists Open Source issues grouped by severity for the manifest(s) in the workspace, and the dependency count matches the CLI result from Phase 1, Step 5.</div>
+</div>
+
+<h3>5.2 JetBrains IDEs (IntelliJ IDEA, WebStorm, PyCharm, etc.)</h3>
+
+<div class="step">
+  <h3><span class="num">1</span>Install the plugin</h3>
+  <ol>
+    <li><strong>Settings/Preferences → Plugins → Marketplace</strong> → search <strong>“Snyk Security”</strong> → <strong>Install</strong> → restart the IDE.</li>
+    <li>The plugin bundles/downloads the Snyk CLI. If <code>downloads.snyk.io</code> is blocked, set <strong>CLI path</strong> in <strong>Settings → Tools → Snyk</strong> to the binary from Phase 1, Step 2.</li>
+  </ol>
+  <div class="ref">Official link — Configuration for the Snyk JetBrains plugin and IDE proxy: <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/configuration-for-the-snyk-jetbrains-plugin-and-ide-proxy">https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/configuration-for-the-snyk-jetbrains-plugin-and-ide-proxy</a></div>
+</div>
+
+<div class="step">
+  <h3><span class="num">2</span>Switch authentication to PAT</h3>
+  <ol>
+    <li>Navigate to <strong>Settings → Tools → Snyk</strong>.</li>
+    <li>Set the <strong>Authentication Method</strong> to <strong>Use Personal Access Token</strong>.</li>
+    <li>Click the <strong>Connect IDE to Snyk</strong> button.</li>
+    <li>Paste the PAT into the <strong>Token</strong> field.</li>
+    <li>Click <strong>Apply and Close</strong>.</li>
+  </ol>
+  <div class="ref">Official link — Authentication for the JetBrains plugin (PAT steps): <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/authentication-for-the-jetbrains-plugins">https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/authentication-for-the-jetbrains-plugins</a></div>
+</div>
+
+<div class="step">
+  <h3><span class="num">3</span>Open the project and trigger the SCA scan</h3>
+  <ol>
+    <li>Open the pilot project (again: dependencies must be resolvable on this machine — for Maven/Gradle projects, ensure <code>mvn</code>/<code>gradle</code> is on <code>PATH</code> for the IDE process, and the internal repositories in <code>settings.xml</code>/<code>build.gradle</code> are reachable).</li>
+    <li>Click the <strong>Snyk icon</strong> in the navigation bar → <strong>Trust project and scan</strong>.</li>
+    <li>Verify the Snyk tool window shows <strong>Open Source Security</strong> results with severity grouping and remediation advice.</li>
+  </ol>
+  <div class="ok"><strong class="tag">Success signal</strong>The Snyk tool window populates Open Source Security findings for the project, matching the CLI scan results in count and severity distribution.</div>
+</div>
+
+<!-- ===================== 6. SUCCESS CRITERIA ===================== -->
+<h2>6. Pilot success criteria</h2>
+<p>A tester passes the pilot when all of the following are true:</p>
+<ul class="checklist">
+  <li>PAT created (or legacy API token fallback documented) and stored securely.</li>
+  <li><code>snyk auth &lt;PAT&gt;</code> succeeds headlessly on the internal network.</li>
+  <li><code>snyk test</code> completes on at least one project per relevant ecosystem with exit code <code>0</code> or <code>1</code> (not <code>2</code>/<code>3</code>).</li>
+  <li>The reported dependency count matches the package manager’s own tree (spot-check with <code>mvn dependency:tree</code> / <code>npm ls</code> / <code>pip list</code>).</li>
+  <li>Results include transitive (indirect) dependency paths — proof the full tree was built.</li>
+  <li>(Optional) <code>snyk monitor</code> creates a Project visible in the Snyk Web UI.</li>
+  <li>IDE plugin authenticates with the PAT and its Open Source Security results match the CLI results for the same project.</li>
+  <li>Any failure was captured with <code>snyk test -d</code> debug logs and reported to the pilot owner.</li>
+</ul>
+
+<!-- ===================== 7. TROUBLESHOOTING ===================== -->
+<h2>7. Troubleshooting</h2>
+<table>
+  <tr><th style="width:32%">Symptom</th><th>Likely cause &amp; fix</th></tr>
+  <tr>
+    <td>Exit code <code>3</code> — “no supported projects detected”</td>
+    <td>No supported manifest in the scanned folder. Run from the folder that contains the manifest, or pass <code>--file=&lt;manifest&gt;</code> (for pip also <code>--package-manager=pip</code>).</td>
+  </tr>
+  <tr>
+    <td>Scan fails or dependency count is far lower than expected</td>
+    <td>Incomplete dependency resolution — missing lockfile, package manager not on <code>PATH</code>, or internal artifact repository unreachable. Reproduce with the package manager itself (Section 3.2 checklist), then re-run <code>snyk test -d</code>.</td>
+  </tr>
+  <tr>
+    <td>Gradle project: incomplete tree / missing transitive issues</td>
+    <td>No committed <code>gradle.lockfile</code>. Use the CLI/IDE workflow (this pilot) rather than SCM import, and ensure the Gradle build resolves successfully on the machine.</td>
+  </tr>
+  <tr>
+    <td>Python: “package not found” / “no matching distribution” errors</td>
+    <td>Wrong Python version or packages not installed. Use <code>--command=python3</code>, install the requirements first, and use <code>--skip-unresolved</code> for private packages Snyk cannot reach.</td>
+  </tr>
+  <tr>
+    <td>HTTP 401 / authentication errors</td>
+    <td>Wrong or expired token, or wrong regional endpoint. Re-run <code>snyk auth &lt;PAT&gt;</code>; set <code>snyk config environment &lt;REGION&gt;</code> if not on SNYK-US-01.</td>
+  </tr>
+  <tr>
+    <td>SSL / certificate errors through the internal proxy</td>
+    <td>Self-signed internal CA. Configure <code>HTTPS_PROXY</code> correctly; as a last resort use <code>--insecure</code> (CLI) or the IDE “Insecure (skip SSL verification)” setting — internal CA only.</td>
+  </tr>
+  <tr>
+    <td>IDE: no PAT option / PAT not accepted</td>
+    <td>PAT is progressively rolled out to Enterprise organizations — ask the Snyk account team to enable it. Meanwhile, use the legacy API token authentication method; do not use Service Account tokens in the IDE.</td>
+  </tr>
+  <tr>
+    <td>IDE: CLI download fails</td>
+    <td><code>downloads.snyk.io</code> blocked. Install the CLI manually (Phase 1, Step 2) and set <strong>CLI path</strong> in the plugin settings.</td>
+  </tr>
+</table>
+<div class="ref">Official link — Snyk Error Catalog (CLI/Open Source error codes and workarounds): <a href="https://docs.snyk.io/scan-with-snyk/error-catalog">https://docs.snyk.io/scan-with-snyk/error-catalog</a></div>
+
+<!-- ===================== 8. REFERENCES ===================== -->
+<h2>8. Official reference links</h2>
+<table>
+  <tr><th>Topic</th><th>Link</th></tr>
+  <tr><td>Obtain a PAT / personal API token</td><td><a href="https://docs.snyk.io/getting-started-guides/getting-started">https://docs.snyk.io/getting-started-guides/getting-started</a></td></tr>
+  <tr><td>Install the Snyk CLI</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/install-the-snyk-cli">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/install-the-snyk-cli</a></td></tr>
+  <tr><td>Authenticate to use the CLI (PAT / env var / regions)</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/authenticate-to-use-the-cli">https://docs.snyk.io/developer-tools/snyk-cli/authenticate-to-use-the-cli</a></td></tr>
+  <tr><td>Getting started with the Snyk CLI (package manager on PATH)</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/getting-started-with-the-snyk-cli">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/getting-started-with-the-snyk-cli</a></td></tr>
+  <tr><td>Snyk CLI for Open Source (dependency tree, manifest detection)</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-open-source">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-open-source</a></td></tr>
+  <tr><td><code>snyk test</code> command reference</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/test">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/test</a></td></tr>
+  <tr><td><code>snyk monitor</code> command reference</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/monitor">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/monitor</a></td></tr>
+  <tr><td>CLI commands and options summary</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/cli-commands-and-options-summary">https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/cli-commands-and-options-summary</a></td></tr>
+  <tr><td>VS Code extension — authentication (PAT)</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/authentication-for-visual-studio-code-extension">https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/authentication-for-visual-studio-code-extension</a></td></tr>
+  <tr><td>VS Code extension — configuration, env vars, proxy</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/visual-studio-code-extension-configuration-environment-variables-and-proxy">https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/visual-studio-code-extension-configuration-environment-variables-and-proxy</a></td></tr>
+  <tr><td>JetBrains plugin — authentication (PAT)</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/authentication-for-the-jetbrains-plugins">https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/authentication-for-the-jetbrains-plugins</a></td></tr>
+  <tr><td>JetBrains plugin — configuration and IDE proxy</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/configuration-for-the-snyk-jetbrains-plugin-and-ide-proxy">https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/configuration-for-the-snyk-jetbrains-plugin-and-ide-proxy</a></td></tr>
+  <tr><td>Unified IDE Configuration Dialog (token, endpoint, insecure, CLI path)</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/unified-ide-configuration-dialog">https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/unified-ide-configuration-dialog</a></td></tr>
+  <tr><td>Supported languages, package managers, and frameworks</td><td><a href="https://docs.snyk.io/supported-languages/supported-languages-package-managers-and-frameworks">https://docs.snyk.io/supported-languages/supported-languages-package-managers-and-frameworks</a></td></tr>
+  <tr><td>Supported languages list (per-language manifest &amp; requirement details)</td><td><a href="https://docs.snyk.io/supported-languages/supported-languages-list">https://docs.snyk.io/supported-languages/supported-languages-list</a></td></tr>
+  <tr><td>Best practices for Java and Kotlin (Gradle lockfile guidance)</td><td><a href="https://docs.snyk.io/getting-started/supported-languages-and-frameworks/java-and-kotlin/best-practices-for-java-and-kotlin">https://docs.snyk.io/getting-started/supported-languages-and-frameworks/java-and-kotlin/best-practices-for-java-and-kotlin</a></td></tr>
+  <tr><td>Snyk Error Catalog (troubleshooting codes)</td><td><a href="https://docs.snyk.io/scan-with-snyk/error-catalog">https://docs.snyk.io/scan-with-snyk/error-catalog</a></td></tr>
+</table>
+
+<footer>
+  Snyk SCA Pilot Testing Guide v1.0 · Generated 2026-08-13 · Scope: IDE &amp; CLI, PAT authentication · All reference links point to official Snyk documentation (docs.snyk.io), verified at generation time.
+</footer>
+
+</div>
+</body>
+</html>
