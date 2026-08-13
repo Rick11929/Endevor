@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snyk IaC Pilot Testing Guide — IDE &amp; CLI (PAT Authentication)</title>
+<style>
+  :root {
+    --ink: #1a2332;
+    --muted: #5b6572;
+    --accent: #4b45ce;
+    --accent-soft: #efedfb;
+    --border: #e2e6ec;
+    --code-bg: #f4f6f9;
+    --warn-bg: #fff7e6;
+    --warn-border: #f0c36d;
+    --ok-bg: #eaf7ee;
+    --ok-border: #7ec98f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.65;
+    background: #fafbfc;
+  }
+  .page {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 48px 32px 96px;
+  }
+  header.hero {
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+  }
+  header.hero .kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-size: 30px;
+    margin: 0 0 10px;
+    line-height: 1.25;
+  }
+  .subtitle { color: var(--muted); font-size: 15px; max-width: 720px; }
+  .meta {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .meta span { display: inline-block; margin-right: 18px; }
+  h2 {
+    font-size: 22px;
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  h2 .phase {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+    vertical-align: middle;
+    text-transform: uppercase;
+  }
+  h3 { font-size: 17px; margin-top: 32px; }
+  h4 { font-size: 15px; margin-top: 24px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+    font-size: 0.9em;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  pre {
+    background: #161c26;
+    color: #e8edf4;
+    padding: 16px 18px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+  }
+  pre .cmt { color: #7d8aa0; }
+  .doc-link {
+    display: block;
+    margin: 10px 0 0;
+    padding: 10px 14px;
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    font-size: 13.5px;
+    word-break: break-all;
+  }
+  .doc-link .lbl { font-weight: 700; margin-right: 6px; }
+  .note, .warn, .ok {
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin: 16px 0;
+  }
+  .warn { background: var(--warn-bg); border: 1px solid var(--warn-border); }
+  .ok { background: var(--ok-bg); border: 1px solid var(--ok-border); }
+  .note { background: #eef3fa; border: 1px solid #b9cbe8; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 9px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--code-bg); font-weight: 700; }
+  ol.steps > li { margin-bottom: 10px; }
+  .toc {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 24px;
+    font-size: 14.5px;
+  }
+  .toc ol { margin: 8px 0 0; }
+  .checklist li { margin-bottom: 6px; }
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="hero">
+  <div class="kicker">Pilot Testing Guide</div>
+  <h1>Snyk Infrastructure as Code (IaC) — CLI &amp; IDE Pilot</h1>
+  <p class="subtitle">
+    Step-by-step configuration and validation guide for piloting <code>snyk iac test</code>
+    via the <strong>Snyk CLI</strong> and <strong>IDE plugins (VS Code &amp; JetBrains)</strong>.
+    Because SSO is not available on the internal network, <strong>all authentication uses
+    a Personal Access Token (PAT)</strong>.
+  </p>
+  <div class="meta">
+    <span><strong>Scope:</strong> CLI testing + IDE testing only (no CI/CD, no SCM integration)</span>
+    <span><strong>Auth:</strong> Personal Access Token (PAT)</span>
+    <span><strong>Version:</strong> 1.0 — August 2026</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#scope">Scope, Objectives &amp; Prerequisites</a></li>
+    <li><a href="#phase0">Phase 0 — Account Setup &amp; PAT Generation</a></li>
+    <li><a href="#phase1">Phase 1 — CLI Track (Install, Authenticate, Scan)</a></li>
+    <li><a href="#phase2">Phase 2 — IDE Track (VS Code &amp; JetBrains)</a></li>
+    <li><a href="#phase3">Phase 3 — Pilot Test Cases &amp; Validation Checklist</a></li>
+    <li><a href="#intranet">Intranet / Network Considerations</a></li>
+    <li><a href="#references">Official Reference Index</a></li>
+  </ol>
+</nav>
+
+<!-- ===================== SCOPE ===================== -->
+<h2 id="scope"><span class="phase">Intro</span>1. Scope, Objectives &amp; Prerequisites</h2>
+
+<h3>1.1 Pilot objectives</h3>
+<ul>
+  <li>Validate that Snyk IaC scanning detects misconfigurations in Terraform, Kubernetes YAML, CloudFormation, and ARM files.</li>
+  <li>Verify the developer workflow in the <strong>CLI</strong> (ad-hoc and pre-commit scanning) and in the <strong>IDE</strong> (inline, on-save scanning).</li>
+  <li>Confirm that PAT-based authentication works end-to-end on the internal network without SSO/OAuth browser flows.</li>
+  <li>Confirm network reachability to Snyk endpoints through the corporate proxy/firewall.</li>
+</ul>
+
+<h3>1.2 Out of scope</h3>
+<ul>
+  <li>CI/CD pipeline integration, SCM (Git repository) integration, Snyk Broker, Snyk Code / Snyk Open Source / Snyk Container testing, and custom Rego rules.</li>
+</ul>
+
+<h3>1.3 Prerequisites</h3>
+<table>
+  <tr><th>Item</th><th>Requirement</th></tr>
+  <tr><td>Snyk account</td><td>A Snyk account in the pilot Organization. PAT support is recommended (see note in Phase 0).</td></tr>
+  <tr><td>CLI runtime</td><td>Node.js (for the npm install method) <em>or</em> permission to run the standalone Snyk binary.</td></tr>
+  <tr><td>IDE</td><td>Visual Studio Code (supported OS: Linux/Windows/macOS) and/or a JetBrains IDE (IntelliJ IDEA, PyCharm, WebStorm, etc.).</td></tr>
+  <tr><td>Network</td><td>Outbound HTTPS access to <code>*.snyk.io</code> (directly or via corporate proxy). See <a href="#intranet">Intranet considerations</a>.</td></tr>
+  <tr><td>Sample IaC files</td><td>A small repository of representative Terraform / Kubernetes / CloudFormation files (include at least one intentionally insecure file).</td></tr>
+</table>
+
+<!-- ===================== PHASE 0 ===================== -->
+<h2 id="phase0"><span class="phase">Phase 0</span>2. Account Setup &amp; PAT Generation</h2>
+
+<h3>Step 0.1 — Confirm the Snyk region / endpoint</h3>
+<ol class="steps">
+  <li>Log in to the Snyk Web UI (for example <code>https://app.snyk.io</code>) and confirm which region your tenant is hosted in (<code>SNYK-US-01</code>, <code>SNYK-US-02</code>, <code>SNYK-EU-01</code>, or <code>SNYK-AU-01</code>).</li>
+  <li>If your tenant is <em>not</em> on the default <code>SNYK-US-01</code> endpoint, record the region name — the CLI must be pointed at it <em>before</em> authentication (Step 1.2).</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/authenticate-to-use-the-cli">Authenticate to use the CLI — Prerequisites (environment config)</a>
+</span>
+
+<h3>Step 0.2 — Generate a Personal Access Token (PAT)</h3>
+<ol class="steps">
+  <li>Log in to the Snyk Web UI and open your <strong>personal account settings</strong>.</li>
+  <li>In the sidebar, navigate to <strong>Personal Access Tokens</strong>.</li>
+  <li>Complete the form and click <strong>Generate new token</strong>.</li>
+  <li>Copy the token immediately and store it in the corporate secrets vault. <strong>It cannot be viewed again later and must never be committed to source control.</strong></li>
+  <li>Distribute one PAT per pilot participant (personal tokens) rather than sharing a single token, so activity is attributable per user.</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/getting-started-guides/getting-started">Getting started — Obtain and use your token (Personal Access Tokens)</a><br>
+  <a href="https://docs.snyk.io/developer-tools/snyk-api/authentication-for-api">Authentication for API — How to obtain your personal access token</a>
+</span>
+
+<div class="warn">
+  <strong>Important:</strong> Snyk states that PAT authentication is <em>progressively rolled out to Enterprise
+  customers</em>. If the <strong>Personal Access Tokens</strong> page is not visible in your account settings,
+  contact your Snyk account team / Snyk Support to enable it. As a fallback, the <strong>legacy API token</strong>
+  (Account settings → General → API Token → "click to show") works with the exact same CLI and IDE steps below —
+  everywhere this guide says "PAT", the legacy API token can be substituted.
+</div>
+
+<!-- ===================== PHASE 1 CLI ===================== -->
+<h2 id="phase1"><span class="phase">Phase 1</span>3. CLI Track — Install, Authenticate, Scan</h2>
+
+<h3>Step 1.1 — Install the Snyk CLI</h3>
+<ol class="steps">
+  <li>Install using npm (requires Node.js):
+    <pre><code>npm install -g snyk</code></pre>
+    …or use the standalone executable / Scoop / Homebrew methods listed in the official install page. On a locked-down intranet, download the standalone binary and distribute it through your internal artifact repository.
+  </li>
+  <li>Verify the installation:
+    <pre><code>snyk --version</code></pre>
+  </li>
+  <li>Use CLI version <strong>1.939.0 or later</strong> to get the current IaC test output format, and note that from CLI v1.594.0 onward, IaC configuration files are processed locally and do not leave the machine.</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/install-the-snyk-cli">Install or update the Snyk CLI</a><br>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-iac/understand-the-iac-cli-test-results">Understand the IaC CLI test results (version notes)</a>
+</span>
+
+<h3>Step 1.2 — (Only if non-default region) Point the CLI at your environment</h3>
+<ol class="steps">
+  <li>If your tenant is on <code>SNYK-US-02</code>, <code>SNYK-EU-01</code>, or <code>SNYK-AU-01</code>, run <em>before</em> authenticating:
+    <pre><code>snyk config environment SNYK-EU-01   <span class="cmt"># example</span></code></pre>
+  </li>
+  <li>Skip this step entirely if you are on the default <code>SNYK-US-01</code> endpoint.</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/authenticate-to-use-the-cli">Authenticate to use the CLI — Prerequisites</a>
+</span>
+
+<h3>Step 1.3 — Authenticate with the PAT (no browser / no SSO)</h3>
+<p>Choose <strong>one</strong> of the following three officially supported, browser-free methods. Method A is recommended for pilot desktops.</p>
+
+<h4>Method A — Persist the PAT in the local CLI profile</h4>
+<pre><code>snyk auth &lt;YOUR_PAT&gt;</code></pre>
+<p>Or equivalently via the config command:</p>
+<pre><code>snyk config set api=&lt;YOUR_PAT&gt;</code></pre>
+
+<h4>Method B — Environment variable (recommended for shared/CI-like shells)</h4>
+<pre><code><span class="cmt"># Linux / macOS</span>
+export SNYK_TOKEN=&lt;YOUR_PAT&gt;
+
+<span class="cmt"># Windows (PowerShell)</span>
+$env:SNYK_TOKEN="&lt;YOUR_PAT&gt;"
+
+<span class="cmt"># Windows (persist for the user)</span>
+setx SNYK_TOKEN "&lt;YOUR_PAT&gt;"</code></pre>
+<p><code>SNYK_TOKEN</code> overrides any token stored in the local CLI configuration
+(<code>~/.config/configstore/snyk.json</code>).</p>
+
+<h4>Method C — One-shot per command</h4>
+<pre><code>SNYK_TOKEN=&lt;YOUR_PAT&gt; snyk iac test main.tf</code></pre>
+
+<h4>Verify authentication</h4>
+<pre><code>snyk config get api        <span class="cmt"># should return your token (method A)</span>
+snyk iac test --help       <span class="cmt"># should run without an auth error</span></code></pre>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/authenticate-to-use-the-cli">Authenticate to use the CLI — Personal Access Token (PAT)</a><br>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/auth">snyk auth command reference</a><br>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/configure-the-snyk-cli/configure-snyk-cli-to-connect-to-snyk-api">Configure the Snyk CLI to connect to the Snyk API — SNYK_TOKEN</a>
+</span>
+
+<h3>Step 1.4 — (Intranet) Configure the corporate proxy</h3>
+<ol class="steps">
+  <li>Set the proxy environment variables before running the CLI:
+    <pre><code>export HTTPS_PROXY=http://proxy.corp.example:8080
+export HTTP_PROXY=http://proxy.corp.example:8080
+export NO_PROXY=localhost,127.0.0.1,.corp.example</code></pre>
+  </li>
+  <li>If the corporate proxy performs TLS inspection (MITM), make the proxy's root CA available to Node.js, for example:
+    <pre><code>export NODE_EXTRA_CA_CERTS=/path/to/corp-root-ca.pem</code></pre>
+  </li>
+  <li>If the proxy demands authentication you cannot satisfy, test with the <code>--proxy-noauth</code> flag.</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/configure-the-snyk-cli/proxy-configuration-for-snyk-cli">Proxy configuration for Snyk CLI</a><br>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/configure-the-snyk-cli/environment-variables-for-snyk-cli">Environment variables for Snyk CLI</a><br>
+  <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/troubleshooting-ides/troubleshoot-certificate-errors">Troubleshoot certificate errors (NODE_EXTRA_CA_CERTS)</a>
+</span>
+
+<h3>Step 1.5 — Pin the pilot Organization</h3>
+<ol class="steps">
+  <li>Decide which Snyk Organization owns the pilot results (rule severities are controlled per-Organization).</li>
+  <li>Set it once so it does not need to be repeated:
+    <pre><code>snyk config set org=&lt;ORG_SLUG_OR_ID&gt;</code></pre>
+  </li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-iac/test-your-iac-files">Test your IaC files — Target a specific Snyk Organization</a>
+</span>
+
+<h3>Step 1.6 — Run IaC scans</h3>
+<ol class="steps">
+  <li><strong>Scan everything under the current directory</strong> (recursive):
+    <pre><code>cd /path/to/iac-repo
+snyk iac test</code></pre>
+  </li>
+  <li><strong>Scan specific files</strong> (paths must be under the current working directory):
+    <pre><code>snyk iac test main.tf modules/network.tf</code></pre>
+  </li>
+  <li><strong>Scan a directory, limiting traversal depth:</strong>
+    <pre><code>snyk iac test terraform/ --detection-depth=3</code></pre>
+  </li>
+  <li><strong>Filter by severity:</strong>
+    <pre><code>snyk iac test --severity-threshold=medium</code></pre>
+  </li>
+  <li><strong>Scan a Terraform plan:</strong>
+    <pre><code>terraform plan -out=tfplan.binary
+terraform show -json tfplan.binary &gt; tf-plan.json
+snyk iac test tf-plan.json</code></pre>
+  </li>
+  <li><strong>Export machine-readable results:</strong>
+    <pre><code>snyk iac test --json &gt; results.json
+snyk iac test --sarif-file-output=snyk-iac.sarif</code></pre>
+  </li>
+  <li><strong>(Optional) Send a one-time snapshot to the Snyk Web UI</strong> — there is no <code>snyk monitor</code> equivalent for IaC, so use <code>--report</code>:
+    <pre><code>snyk iac test --report</code></pre>
+  </li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-iac">Snyk CLI for IaC</a><br>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-iac/test-your-iac-files">Test your IaC files</a><br>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/iac-test">snyk iac test command reference</a>
+</span>
+
+<h3>Step 1.7 — Interpret the results</h3>
+<ol class="steps">
+  <li>Each finding lists: severity, issue title, description (<em>Info</em>), the rule URL (<code>https://security.snyk.io/rules/cloud/...</code>), the resource path, the file, and the remediation hint (<em>Resolve</em>).</li>
+  <li>The summary block shows files with/without issues, ignored issues, and a severity breakdown.</li>
+  <li>Exit codes: <code>0</code> = no issues found, <code>1</code> = issues found, <code>2</code> = failure/error. A non-zero exit on findings is expected behavior — wrap accordingly in scripts.</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-iac/understand-the-iac-cli-test-results">Understand the IaC CLI test results</a>
+</span>
+
+<div class="ok">
+  <strong>CLI track exit criteria:</strong> PAT auth succeeds without a browser; <code>snyk iac test</code> completes
+  through the corporate proxy; findings are reported for the intentionally insecure sample files; JSON/SARIF export works.
+</div>
+
+<!-- ===================== PHASE 2 IDE ===================== -->
+<h2 id="phase2"><span class="phase">Phase 2</span>4. IDE Track — VS Code &amp; JetBrains</h2>
+
+<h3>4.A — Visual Studio Code</h3>
+
+<h4>Step 2A.1 — Install the Snyk extension</h4>
+<ol class="steps">
+  <li>Install <strong>Snyk Security</strong> from the VS Code Marketplace (if the Marketplace is blocked on the intranet, download the <code>.vsix</code> and install via <em>Extensions → … → Install from VSIX</em>).</li>
+  <li>On first run the extension automatically downloads the Snyk CLI (which embeds the Snyk Language Server). If outbound download is blocked, disable <strong>Automatic Dependency Management</strong> in the Snyk settings and set <strong>CLI Path</strong> to the internally distributed binary from Step 1.1.</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension">Visual Studio Code extension — install &amp; setup</a><br>
+  <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/visual-studio-code-extension-configuration-environment-variables-and-proxy">VS Code extension configuration, environment variables, and proxy</a>
+</span>
+
+<h4>Step 2A.2 — Authenticate with PAT (no browser / no SSO)</h4>
+<ol class="steps">
+  <li>Click the <strong>Snyk icon</strong> in the Activity Bar, then the <strong>Settings</strong> (gear) icon.</li>
+  <li>Find <strong>Authentication Method</strong> and change it to <strong>Personal Access Token</strong>.</li>
+  <li>Open the Command Palette (<code>Ctrl+Shift+P</code>), run <strong><code>Snyk: Set Token</code></strong>, and paste your PAT.</li>
+  <li>If you use the legacy API token instead, set Authentication Method to <em>Token authentication</em> and use the same <code>Snyk: Set Token</code> command — do <em>not</em> click "Connect &amp; Trust Workspace" (that path opens a browser flow).</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/authentication-for-visual-studio-code-extension">Authentication for the Visual Studio Code extension — PAT steps</a>
+</span>
+
+<h4>Step 2A.3 — Enable and configure IaC scanning</h4>
+<ol class="steps">
+  <li>In Snyk settings → <strong>Scan configuration</strong>, confirm <strong>Snyk IaC</strong> is enabled (it is enabled by default) — it scans Terraform and Kubernetes (and other supported) configuration files.</li>
+  <li>Set <strong>Scanning mode</strong> to <em>auto</em> so scans run on file save and on project open.</li>
+  <li>(Optional) Set the <strong>Organization</strong> to the pilot Org (use the ORG_ID) so results match the CLI configuration from Step 1.5.</li>
+  <li>(Intranet) Configure the proxy via VS Code's <em>Application → Proxy</em> settings <em>or</em> the <code>http_proxy</code>/<code>https_proxy</code> environment variables; for TLS-inspection proxies set <code>NODE_EXTRA_CA_CERTS</code> and restart VS Code.</li>
+  <li>Open the sample IaC repository, <strong>trust the folder</strong> when prompted, save a file, and confirm that issues appear inline and in the Snyk panel.</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/visual-studio-code-extension-configuration-environment-variables-and-proxy">VS Code extension — Scan configuration (Snyk IaC), proxy, environment variables</a><br>
+  <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/troubleshooting-for-visual-studio-code-extension">Troubleshooting for the VS Code extension (CLI download, logs)</a>
+</span>
+
+<h3>4.B — JetBrains IDEs (IntelliJ IDEA, PyCharm, WebStorm, …)</h3>
+
+<h4>Step 2B.1 — Install the Snyk plugin</h4>
+<ol class="steps">
+  <li>Install <strong>Snyk</strong> from <em>Settings → Plugins → Marketplace</em> (or install from disk if the Marketplace is unreachable).</li>
+  <li>The plugin auto-downloads the CLI. On a restricted network, uncheck <strong>Automatically manage needed binaries</strong> and set <strong>Path to Snyk CLI</strong> to the internal binary from Step 1.1.</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/configuration-for-the-snyk-jetbrains-plugin-and-ide-proxy">Configuration for the Snyk JetBrains plugin and IDE proxy (executable settings)</a>
+</span>
+
+<h4>Step 2B.2 — Authenticate with PAT (no browser / no SSO)</h4>
+<ol class="steps">
+  <li>Navigate to <strong>Settings → Tools → Snyk</strong>.</li>
+  <li>Set <strong>Authentication Method</strong> to <strong>Use Personal Access Token</strong>.</li>
+  <li>Click <strong>Connect IDE to Snyk</strong>.</li>
+  <li>Paste the PAT into the <strong>Token</strong> field.</li>
+  <li>Click <strong>Apply and Close</strong>. Analysis starts automatically.</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/authentication-for-the-jetbrains-plugins">Authentication for the JetBrains plugin — PAT steps</a>
+</span>
+
+<h4>Step 2B.3 — Enable and configure IaC scanning</h4>
+<ol class="steps">
+  <li>In <strong>Settings → Tools → Snyk</strong>, confirm <strong>Snyk IaC</strong> is enabled (enabled by default).</li>
+  <li>Enable <strong>Scan automatically on start-up and save</strong>.</li>
+  <li>(Optional) Set <strong>Organization</strong> to the pilot ORG_ID to align with the CLI track.</li>
+  <li>(Intranet) The JetBrains plugin uses the IDE's proxy settings, but the underlying CLI does <em>not</em> — set <em>both</em> the IDE proxy and the <code>HTTPS_PROXY</code>/<code>HTTP_PROXY</code> environment variables for the IDE process.</li>
+  <li>Open the sample IaC project, trust it when prompted, and verify findings appear in the Snyk tool window for Terraform/Kubernetes files.</li>
+</ol>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/configuration-for-the-snyk-jetbrains-plugin-and-ide-proxy">JetBrains plugin configuration (Snyk IaC toggle, proxy)</a><br>
+  <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/troubleshooting-ides/how-to-set-environment-variables-by-operating-system-for-ides-and-cli">How to set environment variables by OS for IDEs and CLI</a>
+</span>
+
+<div class="ok">
+  <strong>IDE track exit criteria:</strong> PAT authentication succeeds without any browser/SSO interaction in both
+  VS Code and JetBrains; IaC findings appear inline for the sample files; scans trigger on save; CLI fallback
+  (internal binary path) works when the plugin cannot download the CLI.
+</div>
+
+<!-- ===================== PHASE 3 ===================== -->
+<h2 id="phase3"><span class="phase">Phase 3</span>5. Pilot Test Cases &amp; Validation Checklist</h2>
+
+<p>Execute each case and record the result. Any <em>Fail</em> blocks sign-off for that track.</p>
+
+<table>
+  <tr><th>#</th><th>Track</th><th>Test case</th><th>Expected result</th><th>Pass / Fail</th></tr>
+  <tr><td>1</td><td>CLI</td><td><code>snyk auth &lt;PAT&gt;</code> on an intranet workstation</td><td>Authenticated; no browser window required</td><td></td></tr>
+  <tr><td>2</td><td>CLI</td><td><code>snyk iac test</code> on repo root with known-bad Terraform (e.g. open security group, unencrypted S3)</td><td>Issues reported with rule IDs, file paths, and remediation hints; exit code 1</td><td></td></tr>
+  <tr><td>3</td><td>CLI</td><td><code>snyk iac test k8s/deployment.yaml</code> (single file)</td><td>Only that file is scanned</td><td></td></tr>
+  <tr><td>4</td><td>CLI</td><td><code>--severity-threshold=high</code></td><td>Only high/critical issues shown</td><td></td></tr>
+  <tr><td>5</td><td>CLI</td><td><code>--json</code> and <code>--sarif-file-output</code></td><td>Valid JSON / SARIF artifacts produced</td><td></td></tr>
+  <tr><td>6</td><td>CLI</td><td><code>snyk iac test --report</code></td><td>Snapshot visible in the Snyk Web UI under the pilot Org</td><td></td></tr>
+  <tr><td>7</td><td>CLI</td><td>Terraform plan flow (<code>terraform show -json</code> → <code>snyk iac test tf-plan.json</code>)</td><td>Plan JSON scanned successfully</td><td></td></tr>
+  <tr><td>8</td><td>VS Code</td><td>PAT auth via <code>Snyk: Set Token</code></td><td>Authenticated; no browser flow</td><td></td></tr>
+  <tr><td>9</td><td>VS Code</td><td>Save a bad <code>.tf</code> file with auto-scan on</td><td>IaC issues appear inline and in the Snyk panel</td><td></td></tr>
+  <tr><td>10</td><td>JetBrains</td><td>PAT auth via Settings → Tools → Snyk</td><td>Authenticated; analysis starts automatically</td><td></td></tr>
+  <tr><td>11</td><td>JetBrains</td><td>Open K8s YAML with known issues</td><td>Issues shown in the Snyk tool window</td><td></td></tr>
+  <tr><td>12</td><td>Both</td><td>Same file scanned in CLI and IDE</td><td>Consistent findings (same Org → same rule set)</td><td></td></tr>
+</table>
+
+<!-- ===================== INTRANET ===================== -->
+<h2 id="intranet"><span class="phase">Net</span>6. Intranet / Network Considerations</h2>
+
+<ul>
+  <li><strong>Allowlist:</strong> permit outbound HTTPS to <code>*.snyk.io</code> (API, downloads, and IaC rules endpoints) on the proxy/firewall for pilot machines.</li>
+  <li><strong>Proxy:</strong> set <code>HTTP_PROXY</code>, <code>HTTPS_PROXY</code>, and <code>NO_PROXY</code> for the CLI; configure the IDE proxy separately for JetBrains (the plugin does not read the CLI's variables, and vice versa).</li>
+  <li><strong>TLS inspection:</strong> if the corporate proxy intercepts TLS, distribute the root CA and set <code>NODE_EXTRA_CA_CERTS</code> (CLI + VS Code). "Allow unknown CA" / <code>--insecure</code> should be used only temporarily for troubleshooting.</li>
+  <li><strong>CLI distribution:</strong> if <code>downloads.snyk.io</code> is unreachable, distribute the standalone CLI binary internally and point IDE plugins at it via their CLI path settings (disable automatic dependency management).</li>
+  <li><strong>Regional endpoint:</strong> if the tenant is not on the default region, run <code>snyk config environment &lt;REGION&gt;</code> before authentication, and set the matching endpoint in IDE settings if required.</li>
+</ul>
+<span class="doc-link"><span class="lbl">Official doc:</span>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/configure-the-snyk-cli/proxy-configuration-for-snyk-cli">Proxy configuration for Snyk CLI</a><br>
+  <a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-iac">Snyk CLI for IaC — Using Snyk behind a proxy / allowlist</a><br>
+  <a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/troubleshooting-ides/troubleshoot-certificate-errors">Troubleshoot certificate errors</a>
+</span>
+
+<!-- ===================== REFERENCES ===================== -->
+<h2 id="references"><span class="phase">Refs</span>7. Official Reference Index</h2>
+<table>
+  <tr><th>Topic</th><th>Official link</th></tr>
+  <tr><td>Getting started / obtain a PAT</td><td><a href="https://docs.snyk.io/getting-started-guides/getting-started">docs.snyk.io/getting-started-guides/getting-started</a></td></tr>
+  <tr><td>Authentication for API (PAT vs API token)</td><td><a href="https://docs.snyk.io/developer-tools/snyk-api/authentication-for-api">docs.snyk.io/developer-tools/snyk-api/authentication-for-api</a></td></tr>
+  <tr><td>Install the Snyk CLI</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/install-the-snyk-cli">docs.snyk.io/developer-tools/snyk-cli/snyk-cli/install-the-snyk-cli</a></td></tr>
+  <tr><td>Authenticate to use the CLI (PAT / env vars)</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/authenticate-to-use-the-cli">docs.snyk.io/developer-tools/snyk-cli/snyk-cli/authenticate-to-use-the-cli</a></td></tr>
+  <tr><td><code>snyk auth</code> command reference</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/auth">docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/auth</a></td></tr>
+  <tr><td>Configure the CLI to connect to the API (SNYK_TOKEN)</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/configure-the-snyk-cli/configure-snyk-cli-to-connect-to-snyk-api">docs.snyk.io/.../configure-snyk-cli-to-connect-to-snyk-api</a></td></tr>
+  <tr><td>Environment variables for Snyk CLI</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/configure-the-snyk-cli/environment-variables-for-snyk-cli">docs.snyk.io/.../environment-variables-for-snyk-cli</a></td></tr>
+  <tr><td>Proxy configuration for Snyk CLI</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/configure-the-snyk-cli/proxy-configuration-for-snyk-cli">docs.snyk.io/.../proxy-configuration-for-snyk-cli</a></td></tr>
+  <tr><td>Snyk CLI for IaC</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-iac">docs.snyk.io/.../snyk-cli-for-iac</a></td></tr>
+  <tr><td>Test your IaC files</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-iac/test-your-iac-files">docs.snyk.io/.../snyk-cli-for-iac/test-your-iac-files</a></td></tr>
+  <tr><td><code>snyk iac test</code> command reference</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/iac-test">docs.snyk.io/developer-tools/snyk-cli/snyk-cli/commands/iac-test</a></td></tr>
+  <tr><td>Understand the IaC CLI test results</td><td><a href="https://docs.snyk.io/developer-tools/snyk-cli/snyk-cli/scan-and-maintain-projects-using-the-cli/snyk-cli-for-iac/understand-the-iac-cli-test-results">docs.snyk.io/.../understand-the-iac-cli-test-results</a></td></tr>
+  <tr><td>VS Code extension — overview/install</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension">docs.snyk.io/.../visual-studio-code-extension</a></td></tr>
+  <tr><td>VS Code extension — authentication (PAT)</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/authentication-for-visual-studio-code-extension">docs.snyk.io/.../authentication-for-visual-studio-code-extension</a></td></tr>
+  <tr><td>VS Code extension — configuration/env/proxy</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/visual-studio-code-extension-configuration-environment-variables-and-proxy">docs.snyk.io/.../visual-studio-code-extension-configuration-environment-variables-and-proxy</a></td></tr>
+  <tr><td>VS Code extension — troubleshooting</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/visual-studio-code-extension/troubleshooting-for-visual-studio-code-extension">docs.snyk.io/.../troubleshooting-for-visual-studio-code-extension</a></td></tr>
+  <tr><td>JetBrains plugin — authentication (PAT)</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/authentication-for-the-jetbrains-plugins">docs.snyk.io/.../authentication-for-the-jetbrains-plugins</a></td></tr>
+  <tr><td>JetBrains plugin — configuration &amp; proxy</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/jetbrains-plugin/configuration-for-the-snyk-jetbrains-plugin-and-ide-proxy">docs.snyk.io/.../configuration-for-the-snyk-jetbrains-plugin-and-ide-proxy</a></td></tr>
+  <tr><td>Set environment variables by OS (IDEs &amp; CLI)</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/troubleshooting-ides/how-to-set-environment-variables-by-operating-system-for-ides-and-cli">docs.snyk.io/.../how-to-set-environment-variables-by-operating-system-for-ides-and-cli</a></td></tr>
+  <tr><td>Troubleshoot certificate errors</td><td><a href="https://docs.snyk.io/developer-tools/integrations/snyk-ide-plugins-and-extensions/troubleshooting-ides/troubleshoot-certificate-errors">docs.snyk.io/.../troubleshoot-certificate-errors</a></td></tr>
+</table>
+
+<footer>
+  <p>Snyk IaC Pilot Testing Guide v1.0 · All procedural steps and links verified against docs.snyk.io as of August 2026.
+  Snyk documentation evolves; re-verify links before rolling the pilot out to a wider audience.</p>
+</footer>
+
+</div>
+</body>
+</html>
