@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snyk Evo Evaluation Requirements &amp; Acceptance Criteria (Reduced Scope)</title>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#121724; --panel2:#171e2e; --line:#232c40;
+    --text:#e6ebf5; --muted:#9aa7bf; --accent:#7c5cff; --accent2:#00d4a6;
+    --warn:#ffb020; --hot:#ff5c7a; --blue:#4da3ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.7;padding-bottom:80px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  header.hero{padding:64px 0 40px;border-bottom:1px solid var(--line);
+    background:radial-gradient(900px 400px at 20% -10%,rgba(124,92,255,.22),transparent),
+               radial-gradient(700px 350px at 85% 0%,rgba(0,212,166,.14),transparent)}
+  .kicker{color:var(--accent2);font-size:13px;letter-spacing:.2em;text-transform:uppercase;font-weight:600}
+  h1{font-size:34px;line-height:1.25;margin:14px 0 10px;font-weight:800}
+  .sub{color:var(--muted);font-size:15.5px;max-width:800px}
+  .meta{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
+  .chip{font-size:12.5px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--panel)}
+  h2{font-size:23px;margin:48px 0 6px;font-weight:750;display:flex;align-items:center;gap:12px}
+  h2 .no{color:#0b0e14;background:var(--accent2);font-size:13px;font-weight:800;border-radius:8px;padding:3px 10px}
+  h3{font-size:17px;margin:24px 0 6px;color:#cdd7ea}
+  p{margin:10px 0;color:#c4cede}
+  .lead{color:var(--muted);font-size:15px}
+  code{font-family:"Cascadia Code",Consolas,monospace;color:#a8e6cf;font-size:.92em}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:6px;margin-left:8px;vertical-align:middle}
+  .ga{background:rgba(0,212,166,.15);color:var(--accent2);border:1px solid rgba(0,212,166,.4)}
+  .note{border-left:3px solid var(--warn);background:var(--panel);padding:14px 18px;border-radius:0 12px 12px 0;margin:16px 0;font-size:14px;color:#d4dcee}
+  .note b{color:var(--warn)}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--accent2);font-size:12px;letter-spacing:.06em;text-transform:uppercase;background:var(--panel)}
+  td{color:#c4cede}
+  tr:hover td{background:rgba(124,92,255,.05)}
+  td a, p a{color:var(--blue);text-decoration:none}
+  td a:hover, p a:hover{text-decoration:underline}
+  ul.clean{list-style:none;margin:10px 0}
+  ul.clean li{padding:6px 0 6px 26px;position:relative;color:#c4cede;font-size:14.5px}
+  ul.clean li::before{content:"▸";position:absolute;left:4px;color:var(--accent2)}
+  .ac{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent2);border-radius:10px;padding:14px 18px;margin:12px 0;font-size:14px}
+  .ac b{color:var(--accent2)}
+  .req{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:12px 0}
+  .req h4{font-size:15px;color:#fff;margin-bottom:4px}
+  .req p{font-size:14px;margin:6px 0 0}
+  .foot{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+  .grid{display:grid;gap:14px;margin-top:16px}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .card h4{font-size:15px;margin-bottom:6px;color:#fff}
+  .card p{font-size:13.5px;color:var(--muted)}
+  .scope-change{border-left:3px solid var(--blue);background:var(--panel);padding:14px 18px;border-radius:0 12px 12px 0;margin:16px 0;font-size:14px;color:#d4dcee}
+  .scope-change b{color:var(--blue)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Evaluation Requirements · Statement of Work Draft</div>
+    <h1>Snyk Evo Platform — Focused Evaluation<br>Requirements &amp; Acceptance Criteria</h1>
+    <p class="sub">Engagement brief for the UK evaluation team. <b>Reduced scope:</b> three capability areas only — Evo AI-SPM, Evo ADS / Snyk Studio, and Platform &amp; Reporting (Workflow/Reporting agents, dashboards, API) — with test scenarios, deliverables, and measurable acceptance criteria.</p>
+    <div class="meta">
+      <span class="chip">Version: Draft 2.0 · 2026-08-19 (scope reduced from v1.0)</span>
+      <span class="chip">Audience: UK Evaluation Engineering Team</span>
+      <span class="chip">Duration: 4 weeks (proposed)</span>
+      <span class="chip">Classification: Internal / Confidential</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="scope-change"><b>Change log (v1.0 → v2.0):</b> scope narrowed from 8 capability areas to 3. Removed: Agent Scan, Agent Guard, Evo COS (AI pentesting / DAST / red teaming), Evo Agentic AppSec remediation agent, and Snyk Secrets. Accordingly removed: the staging attack target, offensive-testing authorisation, hostile-skill red-team samples, and the seeded business-logic flaw corpus. Duration reduced from 6 to 4 weeks. Acceptance criteria renumbered.</div>
+
+  <!-- 1 -->
+  <h2><span class="no">1</span> Purpose &amp; Background</h2>
+  <p>We are evaluating selected capabilities of the <b>Snyk Evo</b> product family (part of the Snyk AI Security Platform) as candidates for our application security / AI security toolchain. This focused evaluation covers the "Discover" loop (Evo AI-SPM), the secure-at-inception development layer (Evo ADS / Snyk Studio), and the platform experience that ties them together (orchestration, reporting, dashboards, API). It must produce an evidence-based Go/No-Go recommendation measured against the acceptance criteria in §6.</p>
+
+  <!-- 2 -->
+  <h2><span class="no">2</span> Scope</h2>
+  <h3>2.1 In scope</h3>
+  <table>
+    <tr><th>#</th><th>Capability</th><th>Status</th><th>What must be evaluated</th></tr>
+    <tr><td>C1</td><td><b>Evo AI-SPM</b> — Discovery Agent, Risk Intelligence Agent, Policy Agent, AI-BOM</td><td><span class="tag ga">GA</span></td><td>AI asset discovery completeness (models, agents, MCP servers, skills, tools), AI-BOM accuracy, risk scoring quality, natural-language policy → CI guardrail translation</td></tr>
+    <tr><td>C2</td><td><b>Evo ADS / Snyk Studio</b> — secure-at-inception scanning inside agent workflows</td><td><span class="tag ga">GA</span></td><td>Installer &amp; MCP server setup across ADEs, scan-at-generation effectiveness, MCP tool profiles, rules-based enforcement, developer overhead</td></tr>
+    <tr><td>C3</td><td><b>Platform &amp; Reporting</b> — Workflow/Reporting agents, dashboards, API</td><td><span class="tag ga">GA</span></td><td>Cross-agent orchestration via natural language, report quality/customisation, dashboard usefulness, API completeness, SSO/RBAC, audit logging</td></tr>
+  </table>
+
+  <h3>2.2 Out of scope (explicitly excluded from this engagement)</h3>
+  <ul class="clean">
+    <li><b>Evo COS</b> (AI Pentesting, DAST, Agent Red Teaming) and any offensive/security testing against running applications.</li>
+    <li><b>Agent Scan</b> and <b>Agent Guard</b> (agent supply chain and runtime behaviour governance).</li>
+    <li><b>Evo Agentic AppSec</b> remediation agent and malicious-code defence (preview capabilities).</li>
+    <li><b>Snyk Secrets</b> detection and prevention gates.</li>
+    <li>Snyk's traditional engines (Code/Open Source/Container/IaC) except as lightweight baselines for comparison.</li>
+    <li>Pricing negotiation and procurement (runs in parallel, not part of this technical evaluation).</li>
+  </ul>
+  <div class="note"><b>Boundary rule:</b> if a test case cannot be completed without one of the excluded capabilities (e.g. a Policy Agent guardrail that depends on a Secrets gate), record it as a dependency finding in the final report instead of testing the excluded capability.</div>
+
+  <h3>2.3 Official Snyk references per capability</h3>
+  <p class="lead">Evaluators must read the official Snyk material for their capability area before writing test cases, and cite the relevant official claim when grading each acceptance criterion (vendor claim vs. observed result).</p>
+  <table>
+    <tr><th>#</th><th>Capability</th><th>Official Snyk links</th></tr>
+    <tr>
+      <td>C1</td><td><b>Evo AI-SPM</b></td>
+      <td>
+        • Press release (GA, RSAC 2026): <a href="https://snyk.io/news/snyk-launches-agent-security-solution/">snyk.io/news/snyk-launches-agent-security-solution</a><br>
+        • Enhanced AI-SPM (Aug 2026, in-AI-BOM skills/MCP risk analysis): <a href="https://snyk.io/news/snyk-launches-evo-continuous-offensive-security/">snyk.io/news/snyk-launches-evo-continuous-offensive-security</a><br>
+        • AI-BOM CLI usage (<code>snyk aibom</code>): <a href="https://snyk.io/blog/cline-supply-chain-attack-prompt-injection-github-actions/">snyk.io/blog/cline-supply-chain-attack-prompt-injection-github-actions</a>
+      </td>
+    </tr>
+    <tr>
+      <td>C2</td><td><b>Evo ADS / Snyk Studio</b></td>
+      <td>
+        • Press release (Evo ADS, GA 2026-06-29): <a href="https://snyk.io/news/snyk-launches-evo-agentic-development-security/">snyk.io/news/snyk-launches-evo-agentic-development-security</a><br>
+        • Official docs — Getting started with Snyk Studio (installer script, MCP server, profiles): <a href="https://docs.snyk.io/agent-security/agentic-security-with-snyk-studio/getting-started-with-snyk-studio">docs.snyk.io/agent-security/agentic-security-with-snyk-studio/getting-started-with-snyk-studio</a><br>
+        • Official docs — Secure-at-Inception rules example (Windsurf guide): <a href="https://docs.snyk.io/agent-security/agentic-security-with-snyk-studio/quickstart-guides/windsurf-guide">docs.snyk.io/agent-security/agentic-security-with-snyk-studio/quickstart-guides/windsurf-guide</a>
+      </td>
+    </tr>
+    <tr>
+      <td>C3</td><td><b>Platform &amp; Reporting</b></td>
+      <td>
+        • Evo portal / preview &amp; design-partner sign-up: <a href="https://evo.ai.snyk.io">evo.ai.snyk.io</a><br>
+        • Platform getting-started docs (integrations, orgs, first scans): <a href="https://docs.snyk.io/getting-started-guides/getting-started">docs.snyk.io/getting-started-guides/getting-started</a>
+      </td>
+    </tr>
+  </table>
+
+  <!-- 3 -->
+  <h2><span class="no">3</span> Test Environment &amp; Assets</h2>
+  <div class="grid g2">
+    <div class="card"><h4>Repositories (provided by us)</h4><p>R1: active service with heavy AI-assisted development (JS/TS + Python). R2: LLM-integrated agent application (tool calling, MCP usage, prompt handling). R3: legacy service with known vulnerability backlog. All sanitised; no production data. A manually compiled ground-truth inventory of AI components ships with the repos.</p></div>
+    <div class="card"><h4>Developer environments</h4><p>5–8 UK team machines covering Claude Code, Cursor, GitHub Copilot (VS Code), and at least one MCP-heavy setup (10+ MCP servers). Mix of macOS and Windows.</p></div>
+    <div class="card"><h4>CI environment</h4><p>One shared CI pipeline per repo (GitHub Actions or equivalent) for Policy Agent guardrail tests in monitor and enforce modes.</p></div>
+    <div class="card"><h4>Test task corpus</h4><p>We provide: (a) 20 scripted AI-generation tasks known to induce vulnerabilities (SQLi, XSS, path traversal, hardcoded credentials, insecure deserialisation); (b) 20 scripted policy violation/compliance cases; (c) the ground-truth AI component inventory for AI-BOM accuracy scoring.</p></div>
+  </div>
+  <div class="note"><b>Access:</b> Evo AI-SPM and Evo ADS entitlements, plus platform/API access, will be provisioned via our Snyk account team before Day 1. The UK team must confirm actual entitlement coverage in week 1 and escalate any gap immediately.</div>
+
+  <!-- 4 -->
+  <h2><span class="no">4</span> Methodology &amp; Test Scenarios</h2>
+
+  <h3>4.1 Phase A — Baseline, Discovery &amp; Governance (Week 1–2) · C1</h3>
+  <div class="req"><h4>A-1 · Baseline scans</h4><p>Run Snyk Code/SCA baselines on R1–R3; record findings, duration, and false-positive impressions as comparators for later claims.</p></div>
+  <div class="req"><h4>A-2 · AI-SPM discovery</h4><p>Enable Discovery Agent across R1–R3 plus developer machines; generate AI-BOMs (<code>snyk aibom</code> locally where SCM integration is not used). Compare against the ground-truth inventory. Measure completeness, phantom-entry rate, and time-to-inventory.</p></div>
+  <div class="req"><h4>A-3 · Risk Intelligence Agent</h4><p>Verify inventory enrichment: model risk taxonomy scoring, skills/MCP server risk analysis inside the AI-BOM, security metadata quality. Sample-check 20 entries for correctness.</p></div>
+  <div class="req"><h4>A-4 · Policy Agent</h4><p>Author three natural-language policies (e.g. "no unregistered models", "skills with externally hosted instructions require approval", "block high-severity reachable vulns in PR"). Verify translation into CI-enforceable guardrails; run monitor mode for ≥ 3 working days, then enforce mode; grade against the 20 scripted violation/compliance cases.</p></div>
+
+  <h3>4.2 Phase B — Secure-at-Inception (Week 2–3) · C2</h3>
+  <div class="req"><h4>B-1 · Studio/ADS rollout</h4><p>Install via the official installer script on hooks-capable ADEs (Claude Code, Cursor, Copilot, Codex CLI) and via manual <code>mcp.json</code> MCP-server registration elsewhere. Validate with a "scan my directory for security issues" prompt. Record install time and failure modes per machine.</p></div>
+  <div class="req"><h4>B-2 · Generation-time scanning</h4><p>Execute the 20 scripted AI-generation tasks. Record detection-at-generation rate, fix-suggestion quality, and rescan-until-clean behaviour.</p></div>
+  <div class="req"><h4>B-3 · MCP profiles &amp; overhead</h4><p>Test <code>lite</code> / <code>full</code> / <code>experimental</code> MCP profiles; measure token/context overhead per profile and median added latency per AI-generation round.</p></div>
+  <div class="req"><h4>B-4 · Rules-based enforcement</h4><p>Deploy Secure-at-Inception rules (per the official Windsurf-guide pattern) to all ADEs; verify the rule file is honoured across at least two different ADE families.</p></div>
+
+  <h3>4.3 Phase C — Platform, Reporting &amp; DX (Week 3–4) · C3</h3>
+  <div class="req"><h4>C-1 · Orchestration</h4><p>Drive one multi-agent workflow from a single natural-language prompt (e.g. "discover all AI assets in R2, assess risk, and produce an executive report"). Record steps requiring human intervention.</p></div>
+  <div class="req"><h4>C-2 · Reporting &amp; dashboards</h4><p>Assess Reporting Agent output quality and customisability; evaluate dashboards for the three audiences: developer, AppSec engineer, executive. Time how long an executive-ready report takes to produce, including manual editing.</p></div>
+  <div class="req"><h4>C-3 · API &amp; enterprise fit</h4><p>Verify programmatic export of findings and AI-BOM data via API; SSO/RBAC; audit logs; data-residency/GDPR posture for UK/EU data (document where scan data and code snippets are processed and retained).</p></div>
+  <div class="req"><h4>C-4 · Developer experience survey</h4><p>Structured questionnaire for all participating engineers: interruption cost, scan latency, alert quality, trust in results — scored 1–5 with free text.</p></div>
+
+  <!-- 5 -->
+  <h2><span class="no">5</span> Deliverables</h2>
+  <table>
+    <tr><th>#</th><th>Deliverable</th><th>Due</th></tr>
+    <tr><td>D1</td><td>Test plan (detailed cases derived from §4, incl. pass/fail recording templates)</td><td>End of Week 1</td></tr>
+    <tr><td>D2</td><td>AI asset inventory &amp; AI-BOM accuracy report (C1)</td><td>End of Week 2</td></tr>
+    <tr><td>D3</td><td>Interim findings log (rolling, shared weekly)</td><td>Weekly, Fridays</td></tr>
+    <tr><td>D4</td><td>Final evaluation report: per-capability results vs acceptance criteria, DX survey analysis, limitations, dependency findings (excluded capabilities), Go/No-Go recommendation per capability</td><td>End of Week 4</td></tr>
+    <tr><td>D5</td><td>Raw evidence pack: configs, logs, screenshots/recordings, scripts (all reproducible)</td><td>End of Week 4</td></tr>
+  </table>
+
+  <!-- 6 -->
+  <h2><span class="no">6</span> Acceptance Criteria</h2>
+  <p class="lead">Each criterion is graded <b>PASS / PARTIAL / FAIL</b> with evidence attached. "Ground truth" refers to the test corpus in §3. Thresholds are targets for a confident Go; PARTIAL triggers a documented risk discussion, not automatic rejection.</p>
+
+  <h3>C1 · Evo AI-SPM</h3>
+  <div class="ac"><b>AC-1.1</b> Discovery completeness: ≥ 90% of ground-truth AI components (models, MCP servers, skills, agent frameworks) present in the generated AI-BOM across R1–R3; ≤ 10% phantom entries.</div>
+  <div class="ac"><b>AC-1.2</b> Time-to-visibility: full inventory for the three repos achievable within 1 working day of enablement.</div>
+  <div class="ac"><b>AC-1.3</b> Risk enrichment: ≥ 90% of the 20 sample-checked AI-BOM entries carry correct risk scoring/metadata (skills and MCP server risk analysis included).</div>
+  <div class="ac"><b>AC-1.4</b> Policy Agent: all 3 natural-language policies translated to CI-executable guardrails; in enforce mode, ≥ 95% enforcement accuracy on the 20 scripted violation/compliance cases; monitor mode produces zero pipeline disruption.</div>
+
+  <h3>C2 · Evo ADS / Snyk Studio</h3>
+  <div class="ac"><b>AC-2.1</b> Install success on 100% of pilot machines across both setup paths (installer script and manual MCP registration), each ≤ 30 min effort.</div>
+  <div class="ac"><b>AC-2.2</b> Secure-at-inception: ≥ 85% of the 20 scripted vulnerable-generation tasks flagged at generation time; flagged issues include actionable remediation guidance; rescan-until-clean loop functions without manual intervention.</div>
+  <div class="ac"><b>AC-2.3</b> Overhead: median added latency per AI-generation round ≤ 30 s; MCP <code>lite</code> profile measurably reduces token/context cost vs <code>full</code> (quantified in report).</div>
+  <div class="ac"><b>AC-2.4</b> Rules portability: the same Secure-at-Inception rule set is honoured by ≥ 2 ADE families without per-ADE rewriting of the rule content.</div>
+
+  <h3>C3 · Platform &amp; Reporting</h3>
+  <div class="ac"><b>AC-3.1</b> Single-prompt multi-agent workflow completes end-to-end and produces an executive-grade report with ≤ 30 min of human editing.</div>
+  <div class="ac"><b>AC-3.2</b> Dashboards serve all three audiences (developer / AppSec / executive) without exporting to third-party tools for routine questions; any gap recorded as a named limitation.</div>
+  <div class="ac"><b>AC-3.3</b> SSO/RBAC and audit logging verified; API allows full programmatic export of findings and AI-BOM data; UK/EU data processing &amp; retention documented and consistent with our GDPR obligations.</div>
+  <div class="ac"><b>AC-3.4</b> DX survey: mean score ≥ 3.5/5 on "would keep this in my workflow"; top 3 friction points documented.</div>
+
+  <h3>Overall Go/No-Go rule</h3>
+  <div class="ac"><b>Go recommendation requires:</b> all three capability areas at PASS or justified PARTIAL, with no FAIL on AC-1.1, AC-2.2, or AC-3.3. All criteria in this reduced scope cover GA capabilities only; any dependency finding touching excluded capabilities (§2.2) is reported separately and does not gate this decision.</div>
+
+  <!-- 7 -->
+  <h2><span class="no">7</span> Logistics, Constraints &amp; Governance</h2>
+  <ul class="clean">
+    <li><b>Timeline:</b> 4 weeks from environment readiness; weekly Friday sync + interim findings log; Week 4 readout to stakeholders.</li>
+    <li><b>Team:</b> 2 UK engineers, ~60% allocation; one named lead owning deliverables D1–D5.</li>
+    <li><b>Safety:</b> no offensive testing in this engagement; do not enable COS, red teaming, or Agent Guard even if visible in the tenant — flag accidental entitlement to the sponsor.</li>
+    <li><b>Data protection:</b> only sanitised repos and synthetic data; the team must document Snyk-side processing locations/retention (feeds AC-3.3) and flag any UK GDPR concern within 48 h.</li>
+    <li><b>Versioning:</b> record exact product versions / build dates for every test; features observed in preview state must be labelled as such in the final report.</li>
+    <li><b>Commercial firewall:</b> no pricing or contract discussions with Snyk; route any such approach back to the sponsor.</li>
+  </ul>
+
+  <!-- 8 -->
+  <h2><span class="no">8</span> RACI (proposed)</h2>
+  <table>
+    <tr><th>Activity</th><th>UK Eval Lead</th><th>UK Eval Engineers</th><th>Sponsor (us)</th><th>Snyk</th></tr>
+    <tr><td>Test plan &amp; execution</td><td>A/R</td><td>R</td><td>C</td><td>I</td></tr>
+    <tr><td>Environment &amp; test corpus</td><td>C</td><td>R</td><td>A/R</td><td>I</td></tr>
+    <tr><td>Entitlement provisioning</td><td>I</td><td>I</td><td>A/R</td><td>R</td></tr>
+    <tr><td>Acceptance-criteria grading</td><td>A/R</td><td>R</td><td>C</td><td>I</td></tr>
+    <tr><td>Go/No-Go decision</td><td>C</td><td>I</td><td>A/R</td><td>I</td></tr>
+  </table>
+
+  <div class="foot">
+    Draft 2.0 · 2026-08-19 · Reduced-scope edition (C1 Evo AI-SPM, C2 Evo ADS / Snyk Studio, C3 Platform &amp; Reporting). Capability GA statuses per Snyk public announcements as of Aug 2026 (Evo AI-SPM GA 2026-03; Evo ADS GA 2026-06). Verify current status with Snyk at kickoff. Supersedes Draft 1.0.
+  </div>
+</div>
+
+</body>
+</html>
